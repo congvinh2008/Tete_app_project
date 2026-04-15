@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ranger Monitor AI</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        height: 100vh;
+        background: #2e7d32;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .card {
+        background: #e0e0e0;
+        width: 420px;
+        padding: 50px 40px;
+        border-radius: 25px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+
+      .title {
+        font-size: 28px;
+        font-weight: bold;
+        color: #2e7d32;
+        margin-bottom: 35px;
+      }
+
+      input {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 18px;
+        border-radius: 12px;
+        border: 1px solid #bbb;
+        font-size: 16px;
+        outline: none;
+      }
+
+      input:focus {
+        border: 1px solid #2e7d32;
+      }
+
+      button {
+        width: 100%;
+        padding: 15px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 20px;
+        background: #2e7d32;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        background: #256628;
+      }
+
+      .google {
+        background: #4285f4;
+      }
+
+      .google:hover {
+        background: #3367d6;
+      }
+
+      .register {
+        background: #757575;
+      }
+
+      .register:hover {
+        background: #5a5a5a;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="card">
+      <div class="title">🌿 Ranger Monitor AI</div>
+
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+
+      <button onclick="login()">Login</button>
+      <button class="google" onclick="loginGoogle()">Login with Google</button>
+      <button class="register" onclick="location.href = '/register'">
+        Register
+      </button>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        GoogleAuthProvider,
+        signInWithPopup,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyB2P5IXOSxwVPz9BKka5Z_VAHwO8f_woGY",
+        authDomain: "test-7a841.firebaseapp.com",
+        projectId: "test-7a841",
+        storageBucket: "test-7a841.appspot.com",
+        messagingSenderId: "174808059664",
+        appId: "1:174808059664:web:056a7e95c67a8742041f95",
+        measurementId: "G-P214QPV3MY",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // 🔐 Login Email/Password
+      window.login = function () {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!email || !password) {
+          alert("Vui lòng nhập đầy đủ thông tin!");
+          return;
+        }
+
+        signInWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            console.log("Login thành công:", userCredential.user);
+            window.location.href = "/";
+          })
+          .catch((error) => {
+            alert(error.message);
+            console.log(error);
+          });
+      };
+
+      // 🔵 Login Google
+      window.loginGoogle = function () {
+        const provider = new GoogleAuthProvider();
+
+        signInWithPopup(auth, provider)
+          .then(() => {
+            window.location.href = "/";
+          })
+          .catch((error) => {
+            alert("Đăng nhập Google thất bại!");
+            console.log(error.message);
+          });
+      };
+    </script>
+  </body>
+</html>

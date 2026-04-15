@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ranger Monitor AI</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #1b5e20;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(to right, #2e7d32, #1b5e20);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    position: relative; /* Quan trọng */
+}
+
+/* Nút login góc phải */
+.login-btn-header {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 8px 18px;
+    border-radius: 12px;
+    border: none;
+    background: #2e7d32;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-btn-header:hover {
+    background: #1b5e20;
+}
+
+.cctv-btn-header {
+    position: absolute;
+    right: 130px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 8px 18px;
+    border-radius: 12px;
+    border: none;
+    background: #2e7d32;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.cctv-btn-header:hover {
+    background: #1b5e20;
+}
+
+
+/* Map */
+#map {
+    height: 420px;
+    border-radius: 20px;
+    margin: 20px;
+}
+
+/* Button container */
+.control-section {
+    display: flex;
+    gap: 20px;
+    padding: 0 20px 20px 20px;
+}
+
+/* Upload + Record */
+.upload-btn, .record-btn {
+    flex: 1;
+    padding: 20px;
+    border-radius: 20px;
+    font-size: 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    color: white;
+}
+
+/* Upload style */
+.upload-btn {
+    background: #2e7d32;
+}
+
+.upload-btn:hover {
+    background: #1b5e20;
+}
+
+/* Record style */
+.record-btn {
+    background: #2e7d32;
+}
+
+.record-btn:hover {
+    background: #1b5e20;
+}
+
+/* Send button */
+.send-btn {
+    margin: 0 20px 30px 20px;
+    padding: 25px;
+    border-radius: 25px;
+    background: #795548;
+    color: white;
+    text-align: center;
+    font-size: 24px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.send-btn:hover {
+    background: #5d4037;
+}
+
+/* Hide default input */
+input[type="file"] {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    🌿 Ranger Monitor AI  
+    
+    <button class="login-btn-header" onclick="location.href = '/login'">
+        🔐 Login
+    </button>
+    <button class="cctv-btn-header" onclick="location.href = '/cctv'">
+        📹 CCTV
+    </button>
+
+</div>
+
+</div>
+
+<div id="map"></div>
+
+<div class="control-section">
+    <label for="fileInput" class="upload-btn">
+        📁 Upload File
+    </label>
+
+    <div class="record-btn" onclick="startRecording()">
+        🎙 Record
+    </div>
+    
+</div>
+
+<div class="send-btn" onclick="sendData()">
+    🚀 Send
+</div>
+
+<input type="file" id="fileInput" accept="audio/*">
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+// Map
+var map = L.map('map').setView([20.99938, 105.800537], 15);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+L.marker([20.99938, 105.800537]).addTo(map)
+    .bindPopup("📍 Vị trí hiện tại<br>Latitude: 20.999380<br>Longitude: 105.800537")
+    .openPopup();
+
+// Recording demo
+function startRecording() {
+    alert("🎙 Bắt đầu ghi âm (cần thêm MediaRecorder để ghi thật)");
+}
+
+function sendData() {
+    alert("🚀 Đã gửi dữ liệu!");
+}
+</script>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { 
+  getAuth, 
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyB2P5IXOSxwVPz9BKka5Z_VAHwO8f_woGY",
+    authDomain: "test-7a841.firebaseapp.com",
+    projectId: "test-7a841",
+    storageBucket: "test-7a841.appspot.com",
+    messagingSenderId: "174808059664",
+    appId: "1:174808059664:web:056a7e95c67a8742041f95",
+    measurementId: "G-P214QPV3MY"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const loginBtn = document.querySelector(".login-btn-header");
+const cctvBtn = document.querySelector(".cctv-btn-header");
+
+// Kiểm tra trạng thái đăng nhập
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Nếu đã đăng nhập
+        loginBtn.innerHTML = `👤 ${user.email} | Logout`;
+        loginBtn.onclick = logout;
+    } else {
+        // Nếu chưa đăng nhập
+        loginBtn.innerHTML = "🔐 Login";
+        loginBtn.onclick = () => {
+            window.location.href = "/login";
+        };
+    }
+});
+
+// Logout
+function logout() {
+    signOut(auth)
+    .then(() => {
+        alert("Đã đăng xuất!");
+        window.location.reload();
+    })
+    .catch(error => alert(error.message));
+}
+
+</script>
+<script src="{{ url_for('static', filename= 'index.js') }}"></script>
+</body>
+</html>
