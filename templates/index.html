@@ -1,247 +1,319 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ranger Monitor AI</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ranger Monitor AI - Dashboard</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <style>
+      :root {
+        --bg: #061306;
+        --panel: #0f2312;
+        --panel2: #132b16;
+        --text: #e8f5e9;
+        --muted: rgba(232, 245, 233, 0.7);
+        --green: #8bc34a;
+        --green2: #2e7d32;
+        --danger: #ef5350;
+        --border: rgba(255, 255, 255, 0.08);
+      }
 
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #1b5e20;
-}
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: radial-gradient(1200px 800px at 30% 0%, #0e2a12, var(--bg));
+        color: var(--text);
+      }
 
-/* Header */
-.header {
-    background: linear-gradient(to right, #2e7d32, #1b5e20);
-    color: white;
-    text-align: center;
-    padding: 20px;
-    font-size: 28px;
-    font-weight: bold;
-    position: relative; /* Quan trọng */
-}
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: linear-gradient(to right, #194e22, #0b1a0f);
+        border-bottom: 1px solid var(--border);
+        padding: 16px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
 
-/* Nút login góc phải */
-.login-btn-header {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 8px 18px;
-    border-radius: 12px;
-    border: none;
-    background: #2e7d32;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
+      .title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
 
-.login-btn-header:hover {
-    background: #1b5e20;
-}
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
 
-.cctv-btn-header {
-    position: absolute;
-    right: 130px;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 8px 18px;
-    border-radius: 12px;
-    border: none;
-    background: #2e7d32;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
+      .btn {
+        padding: 9px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+      }
 
-.cctv-btn-header:hover {
-    background: #1b5e20;
-}
+      .btn:hover {
+        transform: translateY(-1px);
+        border-color: rgba(139, 195, 74, 0.35);
+      }
 
+      .btn.primary {
+        background: linear-gradient(180deg, rgba(46, 125, 50, 0.95), rgba(27, 94, 32, 0.85));
+        border-color: rgba(139, 195, 74, 0.25);
+      }
 
-/* Map */
-#map {
-    height: 420px;
-    border-radius: 20px;
-    margin: 20px;
-}
+      .container {
+        padding: 18px;
+        display: grid;
+        gap: 14px;
+      }
 
-/* Button container */
-.control-section {
-    display: flex;
-    gap: 20px;
-    padding: 0 20px 20px 20px;
-}
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 14px;
+      }
 
-/* Upload + Record */
-.upload-btn, .record-btn {
-    flex: 1;
-    padding: 20px;
-    border-radius: 20px;
-    font-size: 22px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.3s;
-    color: white;
-}
+      @media (max-width: 1100px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
 
-/* Upload style */
-.upload-btn {
-    background: #2e7d32;
-}
+      .card {
+        background: linear-gradient(180deg, var(--panel), var(--panel2));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+      }
 
-.upload-btn:hover {
-    background: #1b5e20;
-}
+      .card .label {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
 
-/* Record style */
-.record-btn {
-    background: #2e7d32;
-}
+      .card .value {
+        font-size: 22px;
+        font-weight: 800;
+      }
 
-.record-btn:hover {
-    background: #1b5e20;
-}
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
 
-/* Send button */
-.send-btn {
-    margin: 0 20px 30px 20px;
-    padding: 25px;
-    border-radius: 25px;
-    background: #795548;
-    color: white;
-    text-align: center;
-    font-size: 24px;
-    cursor: pointer;
-    transition: 0.3s;
-}
+      .pill {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+      }
 
-.send-btn:hover {
-    background: #5d4037;
-}
+      .pill.ok {
+        color: #dcedc8;
+        border-color: rgba(139, 195, 74, 0.25);
+        background: rgba(139, 195, 74, 0.12);
+      }
 
-/* Hide default input */
-input[type="file"] {
-    display: none;
-}
-</style>
-</head>
+      .pill.danger {
+        color: #ffebee;
+        border-color: rgba(239, 83, 80, 0.25);
+        background: rgba(239, 83, 80, 0.12);
+      }
 
-<body>
+      .events-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
 
-<div class="header">
-    🌿 Ranger Monitor AI  
-    
-    <button class="login-btn-header" onclick="location.href = '/login'">
-        🔐 Login
-    </button>
-    <button class="cctv-btn-header" onclick="location.href = '/cctv'">
-        📹 CCTV
-    </button>
+      .events-title {
+        font-size: 15px;
+        font-weight: 800;
+      }
 
-</div>
+      .events-sub {
+        font-size: 12px;
+        color: var(--muted);
+      }
 
-</div>
+      .events {
+        display: grid;
+        gap: 10px;
+      }
 
-<div id="map"></div>
+      .event {
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.12);
+      }
 
-<div class="control-section">
-    <label for="fileInput" class="upload-btn">
-        📁 Upload File
-    </label>
+      .event-top {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        padding: 12px;
+        align-items: start;
+      }
 
-    <div class="record-btn" onclick="startRecording()">
-        🎙 Record
-    </div>
-    
-</div>
+      .event-meta {
+        display: grid;
+        gap: 6px;
+      }
 
-<div class="send-btn" onclick="sendData()">
-    🚀 Send
-</div>
+      .event-title {
+        font-size: 14px;
+        font-weight: 800;
+      }
 
-<input type="file" id="fileInput" accept="audio/*">
+      .event-desc {
+        font-size: 12px;
+        color: var(--muted);
+      }
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+      .event-media {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 10px;
+        padding: 0 12px 12px 12px;
+      }
 
-<script>
-// Map
-var map = L.map('map').setView([20.99938, 105.800537], 15);
+      @media (max-width: 800px) {
+        .event-media {
+          grid-template-columns: 1fr;
+        }
+      }
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap'
-}).addTo(map);
+      .thumb {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+      }
 
-L.marker([20.99938, 105.800537]).addTo(map)
-    .bindPopup("📍 Vị trí hiện tại<br>Latitude: 20.999380<br>Longitude: 105.800537")
-    .openPopup();
+      video {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+      }
 
-// Recording demo
-function startRecording() {
-    alert("🎙 Bắt đầu ghi âm (cần thêm MediaRecorder để ghi thật)");
-}
+      .empty {
+        color: var(--muted);
+        font-size: 13px;
+        padding: 16px 0 6px 0;
+      }
+    </style>
+  </head>
 
-function sendData() {
-    alert("🚀 Đã gửi dữ liệu!");
-}
-</script>
-<script type="module">
+  <body>
+    <header class="header">
+      <div class="title">Ranger Monitor AI — Dashboard</div>
+      <div class="actions">
+        <button class="btn" onclick="location.href='/game'">Game</button>
+        <button class="btn primary" onclick="location.href='/cctv'">CCTV</button>
+        <button class="btn login-btn-header" onclick="location.href='/login'">Login</button>
+      </div>
+    </header>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { 
-  getAuth, 
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    <main class="container">
+      <section class="grid">
+        <div class="card">
+          <div class="label">Tổng số lần phát hiện</div>
+          <div class="row">
+            <div class="value" id="total-events">0</div>
+            <div class="pill" id="health-pill">Chưa có dữ liệu</div>
+          </div>
+        </div>
 
-const firebaseConfig = {
-    apiKey: "AIzaSyB2P5IXOSxwVPz9BKka5Z_VAHwO8f_woGY",
-    authDomain: "test-7a841.firebaseapp.com",
-    projectId: "test-7a841",
-    storageBucket: "test-7a841.appspot.com",
-    messagingSenderId: "174808059664",
-    appId: "1:174808059664:web:056a7e95c67a8742041f95",
-    measurementId: "G-P214QPV3MY"
-};
+        <div class="card">
+          <div class="label">Lần phát hiện gần nhất</div>
+          <div class="value" id="last-seen">—</div>
+          <div class="events-sub" id="last-seen-sub">Mở CCTV để bắt đầu nhận dữ liệu.</div>
+        </div>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+        <div class="card">
+          <div class="label">Tự động cập nhật</div>
+          <div class="row">
+            <div class="value" id="refresh-state">ON</div>
+            <button class="btn" id="refresh-now">Làm mới</button>
+          </div>
+          <div class="events-sub">Dashboard sẽ lấy dữ liệu từ màn camera (CCTV) qua API.</div>
+        </div>
+      </section>
 
-const loginBtn = document.querySelector(".login-btn-header");
-const cctvBtn = document.querySelector(".cctv-btn-header");
+      <section class="card">
+        <div class="events-header">
+          <div>
+            <div class="events-title">Lịch sử phát hiện</div>
+            <div class="events-sub">Lưu ảnh + video clip mỗi lần phát hiện TeTe hoặc “Nguy hiểm”.</div>
+          </div>
+          <div class="events-sub" id="updated-at">—</div>
+        </div>
 
-// Kiểm tra trạng thái đăng nhập
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // Nếu đã đăng nhập
-        loginBtn.innerHTML = `👤 ${user.email} | Logout`;
-        loginBtn.onclick = logout;
-    } else {
-        // Nếu chưa đăng nhập
-        loginBtn.innerHTML = "🔐 Login";
-        loginBtn.onclick = () => {
-            window.location.href = "/login";
-        };
-    }
-});
+        <div id="events" class="events"></div>
+        <div id="events-empty" class="empty" style="display:none;">
+          Chưa có sự kiện nào. Hãy mở trang CCTV và để AI chạy.
+        </div>
+      </section>
+    </main>
 
-// Logout
-function logout() {
-    signOut(auth)
-    .then(() => {
-        alert("Đã đăng xuất!");
-        window.location.reload();
-    })
-    .catch(error => alert(error.message));
-}
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-</script>
-<script src="{{ url_for('static', filename= 'index.js') }}"></script>
-</body>
+      const firebaseConfig = {
+        apiKey: "AIzaSyB2P5IXOSxwVPz9BKka5Z_VAHwO8f_woGY",
+        authDomain: "test-7a841.firebaseapp.com",
+        projectId: "test-7a841",
+        storageBucket: "test-7a841.appspot.com",
+        messagingSenderId: "174808059664",
+        appId: "1:174808059664:web:056a7e95c67a8742041f95",
+        measurementId: "G-P214QPV3MY",
+      };
+
+      const fbApp = initializeApp(firebaseConfig);
+      const auth = getAuth(fbApp);
+
+      const loginBtn = document.querySelector(".login-btn-header");
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          loginBtn.textContent = `${user.email} | Logout`;
+          loginBtn.onclick = logout;
+        } else {
+          loginBtn.textContent = "Login";
+          loginBtn.onclick = () => (window.location.href = "/login");
+        }
+      });
+
+      function logout() {
+        signOut(auth)
+          .then(() => window.location.reload())
+          .catch((error) => alert(error.message));
+      }
+    </script>
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+  </body>
 </html>
