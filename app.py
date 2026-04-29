@@ -83,6 +83,20 @@ def login():
 def cctv():
     return render_template("camera.html")
 
+@app.route("/map")
+def map_view():
+    # Default camera location (edit these values to match your real CCTV position)
+    camera = {
+        "id": "cctv-1",
+        "name": "CCTV / AI CAM",
+        "lat": 10.8231,   # Ho Chi Minh City (example)
+        "lng": 106.6297,  # Ho Chi Minh City (example)
+        "url": "/cctv",
+        # Same stream used in templates/camera.html
+        "stream_url": "http://192.168.1.3:8080/video",
+    }
+    return render_template("map.html", camera=camera)
+
 @app.route("/register")
 def goRegister():
     return render_template("register.html")
@@ -90,6 +104,10 @@ def goRegister():
 @app.route("/game")
 def game():
     return render_template("TeTe_game/index.html")
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
 
 
 @app.route("/html5game/<path:filename>")

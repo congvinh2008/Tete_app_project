@@ -103,6 +103,30 @@ function updateSummary(events) {
   healthEl.textContent = latest.event_type;
 }
 
+function updateLatestVideo(events) {
+  const videoEl = document.getElementById("latest-video");
+  const emptyEl = document.getElementById("latest-video-empty");
+  if (!videoEl || !emptyEl) return;
+
+  if (!events.length || !events[0]?.video_url) {
+    videoEl.pause?.();
+    videoEl.removeAttribute("src");
+    videoEl.load?.();
+    videoEl.style.display = "none";
+    emptyEl.style.display = "flex";
+    return;
+  }
+
+  const url = events[0].video_url;
+  if (videoEl.getAttribute("src") !== url) {
+    videoEl.setAttribute("src", url);
+    videoEl.load();
+  }
+
+  emptyEl.style.display = "none";
+  videoEl.style.display = "block";
+}
+
 async function refresh() {
   const btn = document.getElementById("refresh-now");
   btn.disabled = true;
@@ -110,6 +134,7 @@ async function refresh() {
     const data = await fetchEvents(50);
     const events = Array.isArray(data.events) ? data.events : [];
     updateSummary(events);
+    updateLatestVideo(events);
     renderEvents(events);
   } catch (e) {
     console.warn("Refresh failed:", e);

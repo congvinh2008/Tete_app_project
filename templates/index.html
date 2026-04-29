@@ -42,6 +42,16 @@
         font-size: 18px;
         font-weight: 700;
         letter-spacing: 0.2px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .brand-logo {
+        height: 120px;
+        width: auto;
+        display: block;
+        filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
       }
 
       .actions {
@@ -218,6 +228,24 @@
         background: rgba(255, 255, 255, 0.04);
       }
 
+      .mini-video {
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+      }
+
+      .mini-empty {
+        height: 100%;
+        min-height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        font-size: 13px;
+      }
+
       .empty {
         color: var(--muted);
         font-size: 13px;
@@ -228,10 +256,13 @@
 
   <body>
     <header class="header">
-      <div class="title">Ranger Monitor AI — Dashboard</div>
+      <div class="title">
+        <img class="brand-logo" src="{{ url_for('static', filename='images/tete-logo.png') }}" alt="Tete" />
+      </div>
       <div class="actions">
         <button class="btn" onclick="location.href='/game'">Game</button>
-        <button class="btn primary" onclick="location.href='/cctv'">CCTV</button>
+        <button class="btn" onclick="location.href='/about'">About us</button>
+        <button class="btn primary" onclick="location.href='/map'">CCTV</button>
         <button class="btn login-btn-header" onclick="location.href='/login'">Login</button>
       </div>
     </header>
@@ -259,6 +290,21 @@
             <button class="btn" id="refresh-now">Làm mới</button>
           </div>
           <div class="events-sub">Dashboard sẽ lấy dữ liệu từ màn camera (CCTV) qua API.</div>
+        </div>
+
+        <div class="card">
+          <div class="label">Video gần nhất</div>
+          <div id="latest-video-empty" class="mini-empty">Chưa có video.</div>
+          <video
+            id="latest-video"
+            class="mini-video"
+            style="display: none;"
+            controls
+            muted
+            playsinline
+            preload="metadata"
+          ></video>
+          <div class="events-sub" style="margin-top: 8px;">Preview nhanh video của sự kiện mới nhất.</div>
         </div>
       </section>
 

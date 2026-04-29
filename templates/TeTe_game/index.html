@@ -28,6 +28,39 @@
                 margin: 0px;
                 padding: 0px;
                 border: 0px;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Overlay navigation (outside the canvas) */
+            .tete-overlay-nav {
+                position: fixed;
+                top: 12px;
+                right: 12px;
+                z-index: 9999;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                pointer-events: auto;
+            }
+
+            .tete-btn {
+                padding: 8px 12px;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.18);
+                background: rgba(0, 0, 0, 0.45);
+                color: #e8f5e9;
+                font: 600 13px "Segoe UI", Arial, sans-serif;
+                cursor: pointer;
+                transition: 0.2s;
+                backdrop-filter: blur(6px);
+            }
+
+            .tete-btn:hover {
+                transform: translateY(-1px);
+                border-color: rgba(139, 195, 74, 0.45);
             }
 
             canvas {
@@ -53,6 +86,9 @@
                 margin: 0px;
                 padding: 0px;
                 border: 0px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             div.gm4html5_login {
                 padding: 20px;
@@ -90,6 +126,10 @@
     
 
     <body>
+        <div class="tete-overlay-nav" aria-label="Navigation">
+            <button class="tete-btn" onclick="location.href='/'">Dashboard</button>
+            <button class="tete-btn" onclick="location.href='/about'">About us</button>
+        </div>
         <div class="gm4html5_div_class" id="gm4html5_div_id">
             
             <!-- Builtin injector for splash screen -->

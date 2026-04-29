@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCTV Map</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet/leaflet.css') }}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      referrerpolicy="no-referrer"
+    />
+
+    <style>
+      :root {
+        --bg: #061306;
+        --panel: #0f2312;
+        --panel2: #132b16;
+        --text: #e8f5e9;
+        --muted: rgba(232, 245, 233, 0.7);
+        --border: rgba(255, 255, 255, 0.08);
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: radial-gradient(1200px 800px at 30% 0%, #0e2a12, var(--bg));
+        color: var(--text);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(to right, #194e22, #0b1a0f);
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .title {
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .btn {
+        padding: 9px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        border-color: rgba(139, 195, 74, 0.35);
+      }
+
+      .wrap {
+        padding: 16px;
+        flex: 1;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 12px;
+        min-height: 0;
+      }
+
+      .card {
+        background: linear-gradient(180deg, var(--panel), var(--panel2));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 12px 14px;
+      }
+
+      .sub {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      #map {
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+      }
+
+      .cctv-marker {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        background: rgba(46, 125, 50, 0.35);
+        border: 1px solid rgba(139, 195, 74, 0.85);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+        color: #8bc34a;
+      }
+
+      .cctv-marker i {
+        font-size: 16px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="title">CCTV Map</div>
+      <div class="actions">
+        <button class="btn" onclick="location.href='/'">Dashboard</button>
+        <button class="btn" onclick="location.href='{{ camera.url }}'">Open CCTV</button>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="card">
+        <div><strong>{{ camera.name }}</strong></div>
+        <div class="sub">Lat: {{ camera.lat }}, Lng: {{ camera.lng }}</div>
+        <div class="sub">Click the marker to open the camera.</div>
+      </section>
+
+      <section id="map"></section>
+    </main>
+
+    <script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
+
+    <script>
+      (() => {
+        // Keep this scoped so refresh/hot-reload won't trip "Cannot redeclare ...".
+        const cameraData = {
+          id: {{ camera.id|tojson }},
+          name: {{ camera.name|tojson }},
+          lat: {{ camera.lat|tojson }},
+          lng: {{ camera.lng|tojson }},
+          url: {{ camera.url|tojson }},
+        };
+
+        // Ensure marker icons are loaded from our own server (avoid CDN + tracking prevention issues)
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: "{{ url_for('static', filename='vendor/leaflet/images/marker-icon-2x.png') }}",
+          iconUrl: "{{ url_for('static', filename='vendor/leaflet/images/marker-icon.png') }}",
+          shadowUrl: "{{ url_for('static', filename='vendor/leaflet/images/marker-shadow.png') }}",
+        });
+
+        const map = L.map("map", { zoomControl: true }).setView([cameraData.lat, cameraData.lng], 16);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+
+        const cctvIcon = L.divIcon({
+          className: "",
+          html: '<div class="cctv-marker"><i class="fa-solid fa-video"></i></div>',
+          iconSize: [34, 34],
+          iconAnchor: [17, 17],
+          popupAnchor: [0, -17],
+        });
+
+        const marker = L.marker([cameraData.lat, cameraData.lng], { icon: cctvIcon }).addTo(map);
+        marker.bindPopup(`<b>${cameraData.name}</b><br/><a href="${cameraData.url}">Open CCTV</a>`);
+        marker.on("click", () => marker.openPopup());
+      })();
+    </script>
+  </body>
+</html>

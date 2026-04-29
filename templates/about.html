@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us - TeTe</title>
+
+    <style>
+      :root {
+        --bg: #061306;
+        --panel: #0f2312;
+        --panel2: #132b16;
+        --text: #e8f5e9;
+        --muted: rgba(232, 245, 233, 0.7);
+        --green: #8bc34a;
+        --border: rgba(255, 255, 255, 0.08);
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: radial-gradient(1200px 800px at 30% 0%, #0e2a12, var(--bg));
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: linear-gradient(to right, #194e22, #0b1a0f);
+        border-bottom: 1px solid var(--border);
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .title {
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .title small {
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .btn {
+        padding: 9px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        border-color: rgba(139, 195, 74, 0.35);
+      }
+
+      .btn.primary {
+        background: linear-gradient(180deg, rgba(46, 125, 50, 0.95), rgba(27, 94, 32, 0.85));
+        border-color: rgba(139, 195, 74, 0.25);
+      }
+
+      main {
+        padding: 18px;
+        display: grid;
+        gap: 14px;
+        max-width: 980px;
+        margin: 0 auto;
+      }
+
+      .card {
+        background: linear-gradient(180deg, var(--panel), var(--panel2));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      h1 {
+        margin: 0 0 6px 0;
+        font-size: 22px;
+      }
+
+      h2 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      ul {
+        margin: 10px 0 0 18px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .tag b {
+        color: var(--text);
+      }
+
+      a {
+        color: #c5e1a5;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="title">
+        TeTe <small>Ranger Monitor AI</small>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="location.href='/'">Dashboard</button>
+        <button class="btn" onclick="location.href='/game'">Game</button>
+        <button class="btn primary" onclick="location.href='/map'">CCTV</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h1>About Us</h1>
+        <p>
+          TeTe là một dự án theo dõi/giám sát hỗ trợ ranger (kiểm lâm) với dashboard + CCTV + AI phát hiện sự kiện, kết hợp
+          một mini-game để tăng tương tác/nhận diện dự án.
+        </p>
+        <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px;">
+          <div class="tag"><b>AI</b> Detection</div>
+          <div class="tag"><b>CCTV</b> Monitoring</div>
+          <div class="tag"><b>Map</b> Visualization</div>
+          <div class="tag"><b>Game</b> Experience</div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <section class="card">
+          <h2>Mission</h2>
+          <p>Giúp theo dõi khu vực nhanh hơn và giảm tải cho người vận hành bằng cách tổng hợp dữ liệu theo thời gian thực.</p>
+          <ul>
+            <li>Giảm thời gian phản ứng khi có cảnh báo</li>
+            <li>Ghi nhận lịch sử sự kiện (ảnh/video)</li>
+            <li>Trực quan vị trí camera trên bản đồ</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>Contact</h2>
+          <p>
+            Bạn có thể thay nội dung phần này bằng thông tin nhóm (email/số điện thoại/link mạng xã hội).
+          </p>
+          <ul>
+            <li>Email: <a href="mailto:contact@example.com">trancongvinh601@gmail.com</a></li>
+          </ul>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
+
