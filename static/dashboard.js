@@ -27,6 +27,17 @@ async function fetchEvents(limit = 50) {
   return res.json();
 }
 
+async function clearAllHistory() {
+  const btn = document.getElementById("clear-events");
+  if (btn) btn.disabled = true;
+  try {
+    const res = await fetch("/api/events/clear", { method: "POST" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 function renderEvents(events) {
   const listEl = document.getElementById("events");
   const emptyEl = document.getElementById("events-empty");
@@ -150,6 +161,20 @@ function startAutoRefresh() {
 
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("refresh-now").addEventListener("click", refresh);
+
+  const clearBtn = document.getElementById("clear-events");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", async () => {
+      if (!confirm("Xóa toàn bộ lịch sử (ảnh + video) và làm trống danh sách?")) return;
+      try {
+        await clearAllHistory();
+        await refresh();
+      } catch (e) {
+        alert(e?.message || String(e));
+      }
+    });
+  }
+
   refresh();
   startAutoRefresh();
 });

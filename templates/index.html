@@ -81,6 +81,11 @@
         border-color: rgba(139, 195, 74, 0.25);
       }
 
+      .btn.danger {
+        background: linear-gradient(180deg, rgba(239, 83, 80, 0.95), rgba(183, 28, 28, 0.85));
+        border-color: rgba(239, 83, 80, 0.25);
+      }
+
       .container {
         padding: 18px;
         display: grid;
@@ -314,7 +319,10 @@
             <div class="events-title">Lịch sử phát hiện</div>
             <div class="events-sub">Lưu ảnh + video clip mỗi lần phát hiện TeTe hoặc “Nguy hiểm”.</div>
           </div>
-          <div class="events-sub" id="updated-at">—</div>
+          <div class="actions">
+            <button class="btn danger" id="clear-events" type="button">Xóa lịch sử</button>
+            <div class="events-sub" id="updated-at">—</div>
+          </div>
         </div>
 
         <div id="events" class="events"></div>

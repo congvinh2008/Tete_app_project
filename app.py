@@ -3,6 +3,8 @@ import os
 import random
 import sqlite3
 import uuid
+from pathlib import Path
+from typing import Optional
 from datetime import datetime, timezone
 
 app = Flask(__name__)
@@ -62,6 +64,25 @@ def _save_upload(file_storage, folder, ext_fallback):
 
     rel = os.path.relpath(abs_path, os.path.join(app.root_path, "static"))
     return rel.replace("\\", "/")
+
+
+def _safe_unlink_under(base_dir: str, rel_path: Optional[str]) -> bool:
+    if not rel_path:
+        return False
+
+    base = Path(base_dir).resolve()
+    target = (Path(app.root_path) / "static" / rel_path).resolve()
+
+    try:
+        target.relative_to(base)
+    except ValueError:
+        return False
+
+    try:
+        target.unlink(missing_ok=True)
+        return True
+    except OSError:
+        return False
 
 
 _init_db()
@@ -201,6 +222,22 @@ def create_event():
             "video_url": f"/static/{video_path}" if video_path else None,
         }
     )
+
+
+@app.route("/api/events/clear", methods=["POST"])
+def clear_events():
+    with _db() as conn:
+        rows = conn.execute("SELECT image_path, video_path FROM events").fetchall()
+        conn.execute("DELETE FROM events")
+
+    deleted_files = 0
+    for r in rows:
+        if _safe_unlink_under(DETECTIONS_DIR, r["image_path"]):
+            deleted_files += 1
+        if _safe_unlink_under(DETECTIONS_DIR, r["video_path"]):
+            deleted_files += 1
+
+    return jsonify({"ok": True, "deleted_files": deleted_files})
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
