@@ -1,4 +1,4 @@
-const MODEL_URL = "/static/my_model/";
+const MODEL_URL = "/static/hunter_model/";
 
 let model;
 let labelContainer;
@@ -10,7 +10,6 @@ let isModelLoaded = false;
 
 // Audio alerts
 const amThanhCuu = new Audio("/static/sound/Nguy_hiem.mp3");
-const amThanhTeTe = new Audio("/static/sound/Phat_hien_te_te.mp3");
 let dangPhatCuu = false;
 let dangPhatTeTe = false;
 
@@ -61,12 +60,10 @@ async function predict() {
     const name = prediction[i].className;
     let text = "";
 
-    if (name === "TeTe" && prob >= 0.8) {
-      text = `Phat hien Te Te (${Math.round(prob * 100)}%)`;
-      playAudioOnce("tete");
-      maybeCaptureAndUploadEvent("TeTe", prob);
-    } else if (name === "Nguy hiem" && prob >= 0.8) {
-      text = `CANH BAO: Te Te keu cuu (${Math.round(prob * 100)}%)`;
+    if (name === "Forest" && prob >= 0.8) {
+      text = `Chua co gi ca (${Math.round(prob * 100)}%)`;
+    } else if (name === "Hunter pass" && prob >= 0.8) {
+      text = `Phat hien tho san (${Math.round(prob * 100)}%)`;
       playAudioOnce("nguyhiem");
       maybeCaptureAndUploadEvent("Nguy hiem", prob);
     } else {
@@ -81,16 +78,8 @@ async function predict() {
 }
 
 function playAudioOnce(type) {
-  if (type === "tete" && !dangPhatTeTe) {
-    dangPhatTeTe = true;
-    amThanhTeTe.play().catch(() => {});
-    amThanhTeTe.onended = () => {
-      dangPhatTeTe = false;
-    };
-    return;
-  }
 
-  if (type === "nguyhiem" && !dangPhatCuu) {
+  if ((type === "nguyhiem" || type === "Hunter pass") && !dangPhatCuu) {
     dangPhatCuu = true;
     amThanhCuu.play().catch(() => {});
     amThanhCuu.onended = () => {
@@ -183,7 +172,7 @@ async function maybeCaptureAndUploadEvent(eventType, probability) {
     const form = new FormData();
     form.append("event_type", eventType);
     form.append("probability", String(probability ?? ""));
-    form.append("source", "CCTV");
+    form.append("source", "Hunter Spot");
 
     if (snapshotBlob) form.append("snapshot", snapshotBlob, "snapshot.jpg");
     if (videoBlob) form.append("video", videoBlob, "clip.webm");

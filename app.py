@@ -130,6 +130,9 @@ def game():
 def about():
     return render_template("about.html")
 
+@app.route("/hunter_spot")
+def hunter_spot():
+    return render_template("camera_hunter.html")
 
 @app.route("/html5game/<path:filename>")
 def gamemaker_html5game(filename):

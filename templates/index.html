@@ -1,373 +1,418 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ranger Monitor AI - Dashboard</title>
 
-    <style>
-      :root {
-        --bg: #061306;
-        --panel: #0f2312;
-        --panel2: #132b16;
-        --text: #e8f5e9;
-        --muted: rgba(232, 245, 233, 0.7);
-        --green: #8bc34a;
-        --green2: #2e7d32;
-        --danger: #ef5350;
-        --border: rgba(255, 255, 255, 0.08);
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ranger Monitor AI - Dashboard</title>
 
-      body {
-        margin: 0;
-        font-family: "Segoe UI", Arial, sans-serif;
-        background: radial-gradient(1200px 800px at 30% 0%, #0e2a12, var(--bg));
-        color: var(--text);
-      }
+  <style>
+    :root {
+      --bg: #061306;
+      --panel: #0f2312;
+      --panel2: #132b16;
+      --text: #e8f5e9;
+      --muted: rgba(232, 245, 233, 0.7);
+      --green: #8bc34a;
+      --green2: #2e7d32;
+      --danger: #ef5350;
+      --border: rgba(255, 255, 255, 0.08);
+    }
 
-      .header {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        background: linear-gradient(to right, #194e22, #0b1a0f);
-        border-bottom: 1px solid var(--border);
-        padding: 16px 18px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-      }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 30% 0%, #0e2a12, var(--bg));
+      color: var(--text);
+    }
 
-      .title {
-        font-size: 18px;
-        font-weight: 700;
-        letter-spacing: 0.2px;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-      }
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: linear-gradient(to right, #194e22, #0b1a0f);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
 
-      .brand-logo {
-        height: 120px;
-        width: auto;
-        display: block;
-        filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
-      }
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-      .actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
+    .brand-logo {
+      height: 120px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+    }
 
-      .btn {
-        padding: 9px 14px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.06);
-        color: var(--text);
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.2s;
-      }
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-      .btn:hover {
-        transform: translateY(-1px);
-        border-color: rgba(139, 195, 74, 0.35);
-      }
+    .btn {
+      padding: 9px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
 
-      .btn.primary {
-        background: linear-gradient(180deg, rgba(46, 125, 50, 0.95), rgba(27, 94, 32, 0.85));
-        border-color: rgba(139, 195, 74, 0.25);
-      }
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(139, 195, 74, 0.35);
+    }
 
-      .btn.danger {
-        background: linear-gradient(180deg, rgba(239, 83, 80, 0.95), rgba(183, 28, 28, 0.85));
-        border-color: rgba(239, 83, 80, 0.25);
-      }
+    .btn.primary {
+      background: linear-gradient(180deg, rgba(46, 125, 50, 0.95), rgba(27, 94, 32, 0.85));
+      border-color: rgba(139, 195, 74, 0.25);
+    }
 
-      .container {
-        padding: 18px;
-        display: grid;
-        gap: 14px;
-      }
+    .btn.danger {
+      background: linear-gradient(180deg, rgba(239, 83, 80, 0.95), rgba(183, 28, 28, 0.85));
+      border-color: rgba(239, 83, 80, 0.25);
+    }
 
+    .container {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 1100px) {
       .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 14px;
+        grid-template-columns: 1fr;
       }
+    }
 
-      @media (max-width: 1100px) {
-        .grid {
-          grid-template-columns: 1fr;
-        }
+    .card {
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .card .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .card .value {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+    }
+
+    .pill.ok {
+      color: #dcedc8;
+      border-color: rgba(139, 195, 74, 0.25);
+      background: rgba(139, 195, 74, 0.12);
+    }
+
+    .pill.danger {
+      color: #ffebee;
+      border-color: rgba(239, 83, 80, 0.25);
+      background: rgba(239, 83, 80, 0.12);
+    }
+
+    .events-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .events-title {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .events-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .events {
+      display: grid;
+      gap: 10px;
+    }
+
+    .event {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    .event-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 12px;
+      align-items: start;
+    }
+
+    .event-meta {
+      display: grid;
+      gap: 6px;
+    }
+
+    .event-title {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .event-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .event-media {
+      display: flex;
+      gap: 12px;
+      padding: 0 12px 12px 12px;
+      flex-wrap: wrap;
+    }
+
+    .event-media>div {
+      flex: 0 0 220px;
+      width: 220px;
+    }
+
+    @media (max-width: 520px) {
+      .event-media>div {
+        flex: 1 1 100%;
+        max-width: 100%;
       }
+    }
 
-      .card {
-        background: linear-gradient(180deg, var(--panel), var(--panel2));
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 14px;
-      }
+    .thumb {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
 
-      .card .label {
-        color: var(--muted);
-        font-size: 12px;
-        margin-bottom: 6px;
-      }
+    .event-media video {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
 
-      .card .value {
-        font-size: 22px;
-        font-weight: 800;
-      }
+    .mini-video {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
 
-      .row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-      }
+    .mini-empty {
+      height: 100%;
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-size: 13px;
+    }
 
-      .pill {
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 700;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--muted);
-      }
+    .empty {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 16px 0 6px 0;
+    }
 
-      .pill.ok {
-        color: #dcedc8;
-        border-color: rgba(139, 195, 74, 0.25);
-        background: rgba(139, 195, 74, 0.12);
-      }
+    .tabs-container {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
 
-      .pill.danger {
-        color: #ffebee;
-        border-color: rgba(239, 83, 80, 0.25);
-        background: rgba(239, 83, 80, 0.12);
-      }
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
 
-      .events-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 10px;
-      }
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
 
-      .events-title {
-        font-size: 15px;
-        font-weight: 800;
-      }
+    .tab-btn.active {
+      background: linear-gradient(180deg, rgba(46, 125, 50, 0.95), rgba(27, 94, 32, 0.85));
+      border-color: rgba(139, 195, 74, 0.25);
+      color: var(--text);
+      box-shadow: 0 0 8px rgba(139, 195, 74, 0.2);
+    }
+  </style>
+</head>
 
-      .events-sub {
-        font-size: 12px;
-        color: var(--muted);
-      }
+<body>
+  <header class="header">
+    <div class="title">
+      <img class="brand-logo" src="{{ url_for('static', filename='images/tete-logo.png') }}" alt="Tete" />
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="location.href='/game'">Game</button>
+      <button class="btn" onclick="location.href='/about'">About us</button>
+      <button class="btn primary" onclick="location.href='/map'">Animal Spot</button>
+      <button class="btn primary" onclick="location.href='/hunter_spot'">Hunter Spot</button>
+      <button class="btn login-btn-header" onclick="location.href='/login'">Login</button>
+    </div>
+  </header>
 
-      .events {
-        display: grid;
-        gap: 10px;
-      }
-
-      .event {
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        overflow: hidden;
-        background: rgba(0, 0, 0, 0.12);
-      }
-
-      .event-top {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 10px;
-        padding: 12px;
-        align-items: start;
-      }
-
-      .event-meta {
-        display: grid;
-        gap: 6px;
-      }
-
-      .event-title {
-        font-size: 14px;
-        font-weight: 800;
-      }
-
-      .event-desc {
-        font-size: 12px;
-        color: var(--muted);
-      }
-
-      .event-media {
-        display: grid;
-        grid-template-columns: 220px 1fr;
-        gap: 10px;
-        padding: 0 12px 12px 12px;
-      }
-
-      @media (max-width: 800px) {
-        .event-media {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .thumb {
-        width: 100%;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.04);
-        aspect-ratio: 4 / 3;
-        object-fit: cover;
-      }
-
-      video {
-        width: 100%;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.04);
-      }
-
-      .mini-video {
-        aspect-ratio: 16 / 9;
-        object-fit: cover;
-      }
-
-      .mini-empty {
-        height: 100%;
-        min-height: 140px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--muted);
-        font-size: 13px;
-      }
-
-      .empty {
-        color: var(--muted);
-        font-size: 13px;
-        padding: 16px 0 6px 0;
-      }
-    </style>
-  </head>
-
-  <body>
-    <header class="header">
-      <div class="title">
-        <img class="brand-logo" src="{{ url_for('static', filename='images/tete-logo.png') }}" alt="Tete" />
+  <main class="container">
+    <section class="grid">
+      <div class="card">
+        <div class="label">Tổng số lần phát hiện</div>
+        <div class="row">
+          <div class="value" id="total-events">0</div>
+          <div class="pill" id="health-pill">Chưa có dữ liệu</div>
+        </div>
       </div>
-      <div class="actions">
-        <button class="btn" onclick="location.href='/game'">Game</button>
-        <button class="btn" onclick="location.href='/about'">About us</button>
-        <button class="btn primary" onclick="location.href='/map'">CCTV</button>
-        <button class="btn login-btn-header" onclick="location.href='/login'">Login</button>
+
+      <div class="card">
+        <div class="label">Lần phát hiện gần nhất</div>
+        <div class="value" id="last-seen">—</div>
+        <div class="events-sub" id="last-seen-sub">Mở CCTV để bắt đầu nhận dữ liệu.</div>
       </div>
-    </header>
 
-    <main class="container">
-      <section class="grid">
-        <div class="card">
-          <div class="label">Tổng số lần phát hiện</div>
-          <div class="row">
-            <div class="value" id="total-events">0</div>
-            <div class="pill" id="health-pill">Chưa có dữ liệu</div>
-          </div>
+      <div class="card">
+        <div class="label">Tự động cập nhật</div>
+        <div class="row">
+          <div class="value" id="refresh-state">ON</div>
+          <button class="btn" id="refresh-now">Làm mới</button>
         </div>
+        <div class="events-sub">Dashboard sẽ lấy dữ liệu từ màn camera (CCTV) qua API.</div>
+      </div>
 
-        <div class="card">
-          <div class="label">Lần phát hiện gần nhất</div>
-          <div class="value" id="last-seen">—</div>
-          <div class="events-sub" id="last-seen-sub">Mở CCTV để bắt đầu nhận dữ liệu.</div>
+      <div class="card">
+        <div class="label">Video gần nhất</div>
+        <div id="latest-video-empty" class="mini-empty">Chưa có video.</div>
+        <video id="latest-video" class="mini-video" style="display: none;" controls muted playsinline
+          preload="metadata"></video>
+        <div class="events-sub" style="margin-top: 8px;">Preview nhanh video của sự kiện mới nhất.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="events-header">
+        <div>
+          <div class="events-title">Lịch sử phát hiện</div>
+          <div class="events-sub">Lưu ảnh + video clip mỗi lần phát hiện TeTe hoặc “Nguy hiểm”.</div>
         </div>
-
-        <div class="card">
-          <div class="label">Tự động cập nhật</div>
-          <div class="row">
-            <div class="value" id="refresh-state">ON</div>
-            <button class="btn" id="refresh-now">Làm mới</button>
-          </div>
-          <div class="events-sub">Dashboard sẽ lấy dữ liệu từ màn camera (CCTV) qua API.</div>
+        <div class="actions">
+          <button class="btn danger" id="clear-events" type="button">Xóa lịch sử</button>
+          <div class="events-sub" id="updated-at">—</div>
         </div>
+      </div>
 
-        <div class="card">
-          <div class="label">Video gần nhất</div>
-          <div id="latest-video-empty" class="mini-empty">Chưa có video.</div>
-          <video
-            id="latest-video"
-            class="mini-video"
-            style="display: none;"
-            controls
-            muted
-            playsinline
-            preload="metadata"
-          ></video>
-          <div class="events-sub" style="margin-top: 8px;">Preview nhanh video của sự kiện mới nhất.</div>
-        </div>
-      </section>
+      <div class="tabs-container">
+        <button class="tab-btn active" data-tab="tete">Tê tê</button>
+        <button class="tab-btn" data-tab="hunter">Thợ săn</button>
+      </div>
 
-      <section class="card">
-        <div class="events-header">
-          <div>
-            <div class="events-title">Lịch sử phát hiện</div>
-            <div class="events-sub">Lưu ảnh + video clip mỗi lần phát hiện TeTe hoặc “Nguy hiểm”.</div>
-          </div>
-          <div class="actions">
-            <button class="btn danger" id="clear-events" type="button">Xóa lịch sử</button>
-            <div class="events-sub" id="updated-at">—</div>
-          </div>
-        </div>
+      <div id="events" class="events"></div>
+      <div id="events-empty" class="empty" style="display:none;">
+        Chưa có sự kiện nào. Hãy mở trang CCTV và để AI chạy.
+      </div>
+    </section>
+  </main>
 
-        <div id="events" class="events"></div>
-        <div id="events-empty" class="empty" style="display:none;">
-          Chưa có sự kiện nào. Hãy mở trang CCTV và để AI chạy.
-        </div>
-      </section>
-    </main>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyB2P5IXOSxwVPz9BKka5Z_VAHwO8f_woGY",
+      authDomain: "test-7a841.firebaseapp.com",
+      projectId: "test-7a841",
+      storageBucket: "test-7a841.appspot.com",
+      messagingSenderId: "174808059664",
+      appId: "1:174808059664:web:056a7e95c67a8742041f95",
+      measurementId: "G-P214QPV3MY",
+    };
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyB2P5IXOSxwVPz9BKka5Z_VAHwO8f_woGY",
-        authDomain: "test-7a841.firebaseapp.com",
-        projectId: "test-7a841",
-        storageBucket: "test-7a841.appspot.com",
-        messagingSenderId: "174808059664",
-        appId: "1:174808059664:web:056a7e95c67a8742041f95",
-        measurementId: "G-P214QPV3MY",
-      };
+    const fbApp = initializeApp(firebaseConfig);
+    const auth = getAuth(fbApp);
 
-      const fbApp = initializeApp(firebaseConfig);
-      const auth = getAuth(fbApp);
+    const loginBtn = document.querySelector(".login-btn-header");
 
-      const loginBtn = document.querySelector(".login-btn-header");
-
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          loginBtn.textContent = `${user.email} | Logout`;
-          loginBtn.onclick = logout;
-        } else {
-          loginBtn.textContent = "Login";
-          loginBtn.onclick = () => (window.location.href = "/login");
-        }
-      });
-
-      function logout() {
-        signOut(auth)
-          .then(() => window.location.reload())
-          .catch((error) => alert(error.message));
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginBtn.textContent = `${user.email} | Logout`;
+        loginBtn.onclick = logout;
+      } else {
+        loginBtn.textContent = "Login";
+        loginBtn.onclick = () => (window.location.href = "/login");
       }
-    </script>
+    });
 
-    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
-  </body>
+    function logout() {
+      signOut(auth)
+        .then(() => window.location.reload())
+        .catch((error) => alert(error.message));
+    }
+  </script>
+
+  <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+
 </html>

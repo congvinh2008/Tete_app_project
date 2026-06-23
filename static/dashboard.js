@@ -1,4 +1,6 @@
 let refreshTimer = null;
+let currentEvents = [];
+let activeTab = "tete";
 
 function formatTime(iso) {
   if (!iso) return "—";
@@ -7,9 +9,12 @@ function formatTime(iso) {
   return dt.toLocaleString();
 }
 
-function eventLabel(eventType) {
+function eventLabel(eventType, source) {
   if (eventType === "TeTe") return "Phát hiện TeTe";
-  if (eventType === "Nguy hiem") return "Cảnh báo nguy hiểm";
+  if (eventType === "Nguy hiem") {
+    if (source === "Hunter Spot") return "Phát hiện thợ săn";
+    return "Cảnh báo nguy hiểm";
+  }
   return eventType || "—";
 }
 
@@ -60,7 +65,7 @@ function renderEvents(events) {
     wrap.innerHTML = `
       <div class="event-top">
         <div class="event-meta">
-          <div class="event-title">${eventLabel(ev.event_type)}</div>
+          <div class="event-title">${eventLabel(ev.event_type, ev.source)}</div>
           <div class="event-desc">
             Thời gian: ${formatTime(ev.created_at)} · Độ tin cậy: ${probText} · Nguồn: ${ev.source ?? "—"}
           </div>
@@ -109,7 +114,7 @@ function updateSummary(events) {
 
   const latest = events[0];
   lastEl.textContent = formatTime(latest.created_at);
-  lastSubEl.textContent = `${eventLabel(latest.event_type)} · ${latest.source ?? "camera"}`;
+  lastSubEl.textContent = `${eventLabel(latest.event_type, latest.source)} · ${latest.source ?? "camera"}`;
   healthEl.className = pillClass(latest.event_type);
   healthEl.textContent = latest.event_type;
 }
@@ -138,15 +143,37 @@ function updateLatestVideo(events) {
   videoEl.style.display = "block";
 }
 
+function renderFilteredEvents() {
+  const filtered = currentEvents.filter((ev) => {
+    if (activeTab === "tete") {
+      return ev.event_type === "TeTe";
+    } else if (activeTab === "hunter") {
+      return ev.event_type === "Nguy hiem";
+    }
+    return true;
+  });
+
+  const emptyEl = document.getElementById("events-empty");
+  if (emptyEl) {
+    if (activeTab === "tete") {
+      emptyEl.textContent = "Chưa phát hiện Tê tê. Hãy mở trang CCTV và để AI chạy.";
+    } else {
+      emptyEl.textContent = "Chưa phát hiện Thợ săn. Hãy mở trang CCTV và để AI chạy.";
+    }
+  }
+
+  renderEvents(filtered);
+}
+
 async function refresh() {
   const btn = document.getElementById("refresh-now");
   btn.disabled = true;
   try {
     const data = await fetchEvents(50);
-    const events = Array.isArray(data.events) ? data.events : [];
-    updateSummary(events);
-    updateLatestVideo(events);
-    renderEvents(events);
+    currentEvents = Array.isArray(data.events) ? data.events : [];
+    updateSummary(currentEvents);
+    updateLatestVideo(currentEvents);
+    renderFilteredEvents();
   } catch (e) {
     console.warn("Refresh failed:", e);
   } finally {
@@ -161,6 +188,17 @@ function startAutoRefresh() {
 
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("refresh-now").addEventListener("click", refresh);
+
+  // Tab buttons click listeners
+  const tabBtns = document.querySelectorAll(".tab-btn");
+  tabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      tabBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeTab = btn.getAttribute("data-tab");
+      renderFilteredEvents();
+    });
+  });
 
   const clearBtn = document.getElementById("clear-events");
   if (clearBtn) {
