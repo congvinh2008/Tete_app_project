@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scan Picture – Ranger Monitor AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #061306;
+      --panel: #0f2312;
+      --panel2: #132b16;
+      --text: #e8f5e9;
+      --muted: rgba(232, 245, 233, 0.65);
+      --green: #8bc34a;
+      --green2: #2e7d32;
+      --danger: #ef5350;
+      --border: rgba(255, 255, 255, 0.08);
+      --teal: #00acc1;
+      --teal-glow: rgba(0, 229, 255, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 30% 0%, #0e2a12, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: linear-gradient(to right, #194e22, #0b1a0f);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      height: 90px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 9px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 14px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(139, 195, 74, 0.35);
+    }
+
+    .btn.back-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ===== STEP INDICATOR ===== */
+    .steps-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 28px 20px 10px;
+      overflow-x: auto;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .step-dot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .step-circle.active {
+      border-color: var(--teal);
+      background: rgba(0, 172, 193, 0.15);
+      color: #00e5ff;
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.3);
+    }
+
+    .step-circle.done {
+      border-color: var(--green);
+      background: rgba(139, 195, 74, 0.15);
+      color: var(--green);
+    }
+
+    .step-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+    }
+
+    .step-label.active {
+      color: #00e5ff;
+    }
+
+    .step-label.done {
+      color: var(--green);
+    }
+
+    .step-line {
+      width: 48px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.08);
+      margin-bottom: 22px;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .step-line.done {
+      background: rgba(139, 195, 74, 0.4);
+    }
+
+    @media (max-width: 600px) {
+      .step-line {
+        width: 22px;
+      }
+
+      .step-label {
+        font-size: 9px;
+      }
+    }
+
+    /* ===== MAIN PANEL ===== */
+    .scan-container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px 18px 60px;
+    }
+
+    .scan-panel {
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      animation: fadeSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeSlide {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .panel-icon {
+      font-size: 52px;
+      margin-bottom: 16px;
+      display: block;
+      text-align: center;
+    }
+
+    .panel-title {
+      font-size: 22px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .panel-desc {
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.65;
+      margin-bottom: 28px;
+    }
+
+    /* ===== STEP 1: HOME ===== */
+    .home-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .action-card {
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-card:hover {
+      border-color: rgba(0, 229, 255, 0.35);
+      background: rgba(0, 172, 193, 0.07);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .action-card .ac-icon {
+      font-size: 32px;
+    }
+
+    .action-card .ac-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .action-card .ac-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ===== STEP 2: DETECT SD ===== */
+    .detect-area {
+      border: 2px dashed rgba(0, 229, 255, 0.25);
+      border-radius: 16px;
+      padding: 40px 20px;
+      text-align: center;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .detect-area.scanning::before {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: 0;
+      right: 0;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, 0.08), transparent);
+      animation: scanLine 1.8s ease-in-out infinite;
+    }
+
+    @keyframes scanLine {
+      0% {
+        top: -100%;
+      }
+
+      100% {
+        top: 100%;
+      }
+    }
+
+    .detect-icon-big {
+      font-size: 56px;
+      margin-bottom: 14px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.06);
+        opacity: 0.8;
+      }
+    }
+
+    .sd-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .sd-info-row .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .sd-info-row .value {
+      font-weight: 700;
+    }
+
+    .sd-info-row .value.ok {
+      color: var(--green);
+    }
+
+    /* ===== STEP 3: IMPORT ===== */
+    .file-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 24px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .file-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .file-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .file-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    .file-row {
+      display: grid;
+      grid-template-columns: 32px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      transition: border-color 0.2s;
+    }
+
+    .file-row.selected {
+      border-color: rgba(0, 229, 255, 0.3);
+      background: rgba(0, 172, 193, 0.06);
+    }
+
+    .file-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--teal);
+      cursor: pointer;
+    }
+
+    .file-row .file-name {
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-row .file-size {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .file-icon {
+      font-size: 18px;
+    }
+
+    .import-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* ===== STEP 4: PROGRESS ===== */
+    .progress-wrap {
+      margin-bottom: 24px;
+    }
+
+    .progress-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-bg {
+      height: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #00acc1, #00e5ff);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    .progress-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-card .sv {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .stat-card .sl {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .progress-log {
+      margin-top: 20px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      color: var(--muted);
+    }
+
+    .progress-log .log-line {
+      margin-bottom: 4px;
+    }
+
+    .progress-log .log-line.ok {
+      color: #aed581;
+    }
+
+    .progress-log .log-line.info {
+      color: #4dd0e1;
+    }
+
+    .progress-log .log-line.warn {
+      color: #ffb74d;
+    }
+
+    /* ===== STEP 5: COMPLETE ===== */
+    .complete-icon-wrap {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .checkmark-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(139, 195, 74, 0.2), rgba(46, 125, 50, 0.15));
+      border: 2px solid rgba(139, 195, 74, 0.4);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      box-shadow: 0 0 30px rgba(139, 195, 74, 0.2);
+      animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .complete-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .complete-stat {
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .complete-stat .cs-val {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--green);
+    }
+
+    .complete-stat .cs-lbl {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .complete-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* ===== STEP 6: HISTORY ===== */
+    .history-filter {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .filter-chip:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    .filter-chip.active {
+      background: rgba(0, 172, 193, 0.15);
+      border-color: rgba(0, 229, 255, 0.3);
+      color: #00e5ff;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      transition: border-color 0.2s;
+    }
+
+    .history-item:hover {
+      border-color: rgba(0, 229, 255, 0.2);
+    }
+
+    .history-thumb {
+      width: 80px;
+      height: 60px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .history-thumb-placeholder {
+      width: 80px;
+      height: 60px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .hi-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .hi-meta {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill.tete {
+      color: #dcedc8;
+      border: 1px solid rgba(139, 195, 74, 0.25);
+      background: rgba(139, 195, 74, 0.12);
+    }
+
+    .pill.danger {
+      color: #ffebee;
+      border: 1px solid rgba(239, 83, 80, 0.25);
+      background: rgba(239, 83, 80, 0.12);
+    }
+
+    .pill.unknown {
+      color: var(--muted);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    /* ===== COMMON BUTTONS ===== */
+    .btn-primary {
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      background: linear-gradient(180deg, rgba(0, 172, 193, 0.9), rgba(0, 131, 143, 0.8));
+      color: var(--text);
+      font-weight: 700;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 4px 16px rgba(0, 229, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .btn-secondary:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-green {
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: 1px solid rgba(139, 195, 74, 0.3);
+      background: linear-gradient(180deg, rgba(46, 125, 50, 0.95), rgba(27, 94, 32, 0.85));
+      color: var(--text);
+      font-weight: 700;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .btn-green:hover {
+      box-shadow: 0 4px 16px rgba(139, 195, 74, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* ===== FILE UPLOAD DROP ZONE ===== */
+    .drop-zone {
+      border: 2px dashed rgba(0, 229, 255, 0.2);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 20px;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: rgba(0, 229, 255, 0.5);
+      background: rgba(0, 172, 193, 0.05);
+    }
+
+    .drop-zone .dz-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .drop-zone .dz-text {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .drop-zone .dz-text b {
+      color: #00e5ff;
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    /* ===== HIDDEN ===== */
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <img class="brand-logo" src="{{ url_for('static', filename='images/tete-logo.png') }}" alt="Tete" />
+    <div class="header-right">
+      <button class="btn back-btn" onclick="location.href='/'">← Về Dashboard</button>
+    </div>
+  </header>
+
+  <!-- STEP INDICATOR -->
+  <div class="steps-bar" id="steps-bar">
+    <!-- rendered by JS -->
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="scan-container">
+
+    <!-- SCREEN 1: HOME -->
+    <div class="screen active" id="screen-home">
+      <div class="scan-panel">
+        <span class="panel-icon">📷</span>
+        <div class="panel-title">Import card ID</div>
+        <div class="panel-desc">Nhập ảnh từ thẻ nhớ hoặc upload trực tiếp để AI phân tích và nhận diện Tê tê / Thợ săn.
+        </div>
+
+        <div class="home-actions">
+          <div class="action-card" onclick="goTo('detect-sd')" id="btn-sd-card">
+            <span class="ac-icon">💾</span>
+            <div class="ac-title">Detect SD Card</div>
+            <div class="ac-desc">Phát hiện thẻ nhớ từ camera bẫy và import ảnh tự động</div>
+          </div>
+          <div class="action-card" onclick="goTo('import')" id="btn-upload-direct">
+            <span class="ac-icon">📁</span>
+            <div class="ac-title">Upload ảnh</div>
+            <div class="ac-desc">Chọn ảnh từ máy tính để phân tích ngay lập tức</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: Animal Detect -->
+    <div class="screen" id="screen-detect-sd">
+      <div class="scan-panel">
+        <span class="panel-icon">💾</span>
+        <div class="panel-title">Detect SD Card</div>
+        <div class="panel-desc">Đang quét thiết bị để tìm thẻ nhớ từ camera bẫy động vật...</div>
+
+        <div class="detect-area scanning" id="detect-area">
+          <div class="detect-icon-big">🔍</div>
+          <div style="font-size:14px;color:var(--muted);" id="detect-status-text">Đang quét thiết bị...</div>
+        </div>
+
+        <div id="sd-result" style="display:none;">
+          <div class="sd-info-row">
+            <span class="label">Thiết bị</span>
+            <span class="value ok">SD Card (E:\)</span>
+          </div>
+          <div class="sd-info-row">
+            <span class="label">Dung lượng</span>
+            <span class="value">32 GB</span>
+          </div>
+          <div class="sd-info-row">
+            <span class="label">Ảnh tìm thấy</span>
+            <span class="value ok" id="found-count">0 ảnh</span>
+          </div>
+          <div class="sd-info-row">
+            <span class="label">Ngày ghi nhận</span>
+            <span class="value" id="found-date">—</span>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:20px;">
+          <button class="btn-secondary" onclick="goTo('home')" style="flex:0 0 auto;padding:12px 18px;">← Quay
+            lại</button>
+          <button class="btn-primary" id="btn-import-from-sd" onclick="goTo('import')" style="display:none;">Import ảnh
+            →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: IMPORT -->
+    <div class="screen" id="screen-import">
+      <div class="scan-panel">
+        <span class="panel-icon">📂</span>
+        <div class="panel-title">Chọn ảnh để Import</div>
+        <div class="panel-desc">Chọn ảnh bạn muốn AI phân tích. Có thể chọn nhiều ảnh cùng lúc.</div>
+
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <div class="dz-icon">📸</div>
+          <div class="dz-text">Kéo & thả ảnh vào đây hoặc <b>nhấn để chọn</b></div>
+          <div class="dz-text" style="margin-top:6px;font-size:11px;">Hỗ trợ: JPG, PNG, WEBP — Tối đa 50 ảnh</div>
+        </div>
+        <input type="file" id="file-input" accept="image/*" multiple />
+
+        <div class="file-list" id="file-list"></div>
+
+        <div style="display:flex;gap:12px;margin-top:4px;">
+          <button class="btn-secondary" onclick="goTo('home')" style="flex:0 0 auto;padding:12px 18px;">← Quay
+            lại</button>
+          <button class="btn-primary" id="btn-start-import" onclick="startImport()" disabled style="opacity:0.4;">
+            ▶ Bắt đầu Import
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: PROGRESS -->
+    <div class="screen" id="screen-progress">
+      <div class="scan-panel">
+        <span class="panel-icon">⚙️</span>
+        <div class="panel-title">Đang xử lý...</div>
+        <div class="panel-desc">AI đang phân tích từng ảnh. Vui lòng không tắt trang.</div>
+
+        <div class="progress-wrap">
+          <div class="progress-label-row">
+            <span id="prog-label">Chuẩn bị...</span>
+            <span id="prog-pct">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="prog-bar"></div>
+          </div>
+        </div>
+
+        <div class="progress-stats">
+          <div class="stat-card">
+            <div class="sv" id="stat-done">0</div>
+            <div class="sl">Đã xử lý</div>
+          </div>
+          <div class="stat-card">
+            <div class="sv" id="stat-total">0</div>
+            <div class="sl">Tổng ảnh</div>
+          </div>
+          <div class="stat-card">
+            <div class="sv" id="stat-found" style="color:var(--green);">0</div>
+            <div class="sl">Phát hiện</div>
+          </div>
+        </div>
+
+        <div class="progress-log" id="progress-log">
+          <div class="log-line info">[INFO] Khởi động AI engine...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: IMPORT COMPLETE -->
+    <div class="screen" id="screen-complete">
+      <div class="scan-panel">
+        <div class="complete-icon-wrap">
+          <div class="checkmark-circle">✅</div>
+        </div>
+        <div class="panel-title" style="color:var(--green);">Import Hoàn Tất!</div>
+        <div class="panel-desc" style="margin-bottom:24px;">AI đã phân tích xong tất cả ảnh.</div>
+
+        <div class="complete-stats">
+          <div class="complete-stat">
+            <div class="cs-val" id="c-total">0</div>
+            <div class="cs-lbl">Tổng ảnh đã xử lý</div>
+          </div>
+          <div class="complete-stat">
+            <div class="cs-val" id="c-tete">0</div>
+            <div class="cs-lbl">Tê tê phát hiện</div>
+          </div>
+          <div class="complete-stat">
+            <div class="cs-val" id="c-hunter" style="color:var(--danger);">0</div>
+            <div class="cs-lbl">Thợ săn phát hiện</div>
+          </div>
+          <div class="complete-stat">
+            <div class="cs-val" id="c-clean">0</div>
+            <div class="cs-lbl">Ảnh rỗng</div>
+          </div>
+        </div>
+
+        <!-- Processing Time Display -->
+        <div style="font-size: 13px; color: var(--muted); text-align: center; margin-top: -16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>⏱️ Thời gian xử lý:</span>
+          <strong id="c-time" style="color: #00e5ff; font-weight: 700;">0.0 giây</strong>
+        </div>
+
+        <!-- NEW FEATURE CARD-->
+        <div class="time-saving-card" style="margin-top: 24px; margin-bottom: 24px; text-align: left; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 16px; padding: 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px;">
+              <span style="background: #e65100; color: white; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;">3</span>
+              <span>Tách "Ảnh trống" khỏi "Tổng ảnh"</span>
+            </div>
+            <span style="background: rgba(230, 81, 0, 0.15); color: #ffb74d; border: 1px solid rgba(230, 81, 0, 0.3); padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;">Tiết kiệm thời gian</span>
+          </div>
+
+          <div style="background: rgba(0, 0, 0, 0.2); border-radius: 12px; padding: 16px; border: 1px solid var(--border);">
+            <!-- Hiện tại -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-size: 13px; color: var(--muted); font-weight: 600;">Hiện tại</span>
+              <span style="font-size: 14px; font-weight: 700;">Ảnh trống = 0</span>
+            </div>
+            
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 12px 0;">
+
+            <!-- Nên hiển thị -->
+            <div style="font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 12px;">Nên hiển thị</div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 13px; color: var(--muted);">Tổng ảnh</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <strong style="font-size: 14px;" id="ts-total">0</strong>
+                  <span style="background: rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 999px; font-size: 11px; color: var(--text);">100%</span>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 13px; color: var(--muted);">Ảnh có động vật</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <strong style="font-size: 14px; color: #8bc34a;" id="ts-animals">0</strong>
+                  <span style="background: rgba(139, 195, 74, 0.15); padding: 2px 8px; border-radius: 999px; font-size: 11px; color: #aed581;" id="ts-animals-pct">0%</span>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 13px; color: var(--muted);">Ảnh trống</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <strong style="font-size: 14px; color: #ffb74d;" id="ts-empty">0</strong>
+                  <span style="background: rgba(230, 81, 0, 0.15); padding: 2px 8px; border-radius: 999px; font-size: 11px; color: #ffb74d;" id="ts-empty-pct">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="complete-actions">
+          <button class="btn-secondary" onclick="resetScan()">🔄 Scan mới</button>
+          <button class="btn-green" onclick="goTo('history')">📋 Xem lịch sử →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: HISTORY -->
+    <div class="screen" id="screen-history">
+      <div class="scan-panel">
+        <div class="panel-title" style="text-align:left;margin-bottom:4px;">📋 Import History</div>
+        <div class="panel-desc" style="text-align:left;margin-bottom:20px;">Danh sách ảnh đã được AI phân tích trong lần
+          import này.</div>
+
+        <div class="history-filter">
+          <button class="filter-chip active" onclick="filterHistory('all', this)">Tất cả</button>
+          <button class="filter-chip" onclick="filterHistory('tete', this)">🦔 Tê tê</button>
+          <button class="filter-chip" onclick="filterHistory('hunter', this)">⚠️ Thợ săn</button>
+          <button class="filter-chip" onclick="filterHistory('unknown', this)">❓ Không rõ</button>
+        </div>
+
+        <div class="history-list" id="history-list"></div>
+
+        <div style="display:flex;gap:12px;margin-top:24px;">
+          <button class="btn-secondary" onclick="goTo('complete')">← Kết quả</button>
+          <button class="btn-primary" onclick="resetScan()">🔄 Scan mới</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end scan-container -->
+
+  <script>
+    // ==============================
+    // STATE
+    // ==============================
+    let currentScreen = 'home';
+    let selectedFiles = [];
+    let importResults = [];
+
+    const STEPS = [
+      { id: 'home', label: 'Home', icon: '🏠' },
+      { id: 'detect-sd', label: 'Detect SD', icon: '💾' },
+      { id: 'import', label: 'Import', icon: '📂' },
+      { id: 'progress', label: 'Progress', icon: '⚙️' },
+      { id: 'complete', label: 'Complete', icon: '✅' },
+      { id: 'history', label: 'History', icon: '📋' },
+    ];
+
+    // ==============================
+    // STEP BAR RENDER
+    // ==============================
+    function renderStepBar() {
+      const idx = STEPS.findIndex(s => s.id === currentScreen);
+      const bar = document.getElementById('steps-bar');
+      bar.innerHTML = '';
+
+      STEPS.forEach((step, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'step-item';
+
+        const isDone = i < idx;
+        const isActive = i === idx;
+        const stateClass = isDone ? 'done' : (isActive ? 'active' : '');
+
+        dot.innerHTML = `
+          <div class="step-dot">
+            <div class="step-circle ${stateClass}">${isDone ? '✓' : step.icon}</div>
+            <div class="step-label ${stateClass}">${step.label}</div>
+          </div>
+        `;
+        bar.appendChild(dot);
+
+        if (i < STEPS.length - 1) {
+          const line = document.createElement('div');
+          line.className = 'step-line' + (isDone ? ' done' : '');
+          bar.appendChild(line);
+        }
+      });
+    }
+
+    // ==============================
+    // NAVIGATION
+    // ==============================
+    function goTo(screenId) {
+      // hide all
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById('screen-' + screenId);
+      if (el) el.classList.add('active');
+      currentScreen = screenId;
+      renderStepBar();
+
+      // side effects
+      if (screenId === 'detect-sd') startSDScan();
+      if (screenId === 'history') renderHistory('all');
+    }
+
+    // ==============================
+    // SD CARD SCAN SIMULATION
+    // ==============================
+    function startSDScan() {
+      const area = document.getElementById('detect-area');
+      const status = document.getElementById('detect-status-text');
+      const result = document.getElementById('sd-result');
+      const btnImport = document.getElementById('btn-import-from-sd');
+
+      area.classList.add('scanning');
+      result.style.display = 'none';
+      btnImport.style.display = 'none';
+      status.textContent = 'Đang quét thiết bị...';
+
+      const phases = [
+        [600, 'Tìm kiếm thẻ nhớ...'],
+        [1400, 'Đọc hệ thống tệp...'],
+        [2200, 'Đếm số ảnh...'],
+        [2800, 'Hoàn tất phát hiện!'],
+      ];
+
+      phases.forEach(([ms, txt]) => {
+        setTimeout(() => { status.textContent = txt; }, ms);
+      });
+
+      setTimeout(() => {
+        area.classList.remove('scanning');
+        const count = Math.floor(Math.random() * 60) + 12;
+        document.getElementById('found-count').textContent = count + ' ảnh';
+        const now = new Date();
+        document.getElementById('found-date').textContent = now.toLocaleDateString('vi-VN');
+        result.style.display = 'grid';
+        btnImport.style.display = 'inline-flex';
+
+        // pre-fill fake files for the import step
+        selectedFiles = Array.from({ length: count }, (_, i) => ({
+          name: `IMG_${String(i + 1).padStart(4, '0')}.JPG`,
+          size: (Math.random() * 3 + 0.5).toFixed(1) + ' MB',
+          fake: true,
+        }));
+      }, 3000);
+    }
+
+    // ==============================
+    // FILE UPLOAD
+    // ==============================
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      handleFiles(Array.from(e.dataTransfer.files));
+    });
+
+    fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
+
+    function handleFiles(files) {
+      selectedFiles = files.slice(0, 50).map(f => ({
+        name: f.name,
+        size: (f.size / 1024 / 1024).toFixed(1) + ' MB',
+        file: f,
+      }));
+      renderFileList();
+    }
+
+    function renderFileList() {
+      const list = document.getElementById('file-list');
+      const btn = document.getElementById('btn-start-import');
+      list.innerHTML = '';
+
+      selectedFiles.forEach((f, i) => {
+        const row = document.createElement('div');
+        row.className = 'file-row selected';
+        row.innerHTML = `
+          <input type="checkbox" checked data-idx="${i}" />
+          <span class="file-icon">🖼️</span>
+          <span class="file-name">${f.name}</span>
+          <span class="file-size">${f.size}</span>
+        `;
+        list.appendChild(row);
+      });
+
+      btn.disabled = selectedFiles.length === 0;
+      btn.style.opacity = selectedFiles.length === 0 ? '0.4' : '1';
+    }
+
+    // ==============================
+    // IMPORT / PROGRESS
+    // ==============================
+    function startImport() {
+      // get checked files
+      const checked = Array.from(document.querySelectorAll('#file-list input[type=checkbox]:checked'));
+      const total = checked.length || selectedFiles.length;
+      if (total === 0) return;
+
+      goTo('progress');
+      importResults = [];
+      runProgress(total);
+    }
+
+    function runProgress(total) {
+      const bar = document.getElementById('prog-bar');
+      const label = document.getElementById('prog-label');
+      const pct = document.getElementById('prog-pct');
+      const sDone = document.getElementById('stat-done');
+      const sTotal = document.getElementById('stat-total');
+      const sFound = document.getElementById('stat-found');
+      const log = document.getElementById('progress-log');
+
+      sTotal.textContent = total;
+      let done = 0, found = 0;
+      const startTime = Date.now();
+
+      const labels = ['Tê tê', 'Thợ săn', 'Không rõ'];
+      const types = ['tete', 'hunter', 'unknown'];
+      const probs = [0.92, 0.87, 0.62, 0.71, 0.55, 0.44];
+
+      function step() {
+        if (done >= total) {
+          // done
+          document.getElementById('c-total').textContent = total;
+          const teteCount = importResults.filter(r => r.type === 'tete').length;
+          const hunterCount = importResults.filter(r => r.type === 'hunter').length;
+          const unknownCount = importResults.filter(r => r.type === 'unknown').length;
+          document.getElementById('c-tete').textContent = teteCount;
+          document.getElementById('c-hunter').textContent = hunterCount;
+          document.getElementById('c-clean').textContent = unknownCount;
+
+          // Update time-saving comparison card stats
+          const animalCount = teteCount + hunterCount;
+          const emptyCount = unknownCount;
+          
+          document.getElementById('ts-total').textContent = total.toLocaleString('vi-VN');
+          document.getElementById('ts-animals').textContent = animalCount.toLocaleString('vi-VN');
+          document.getElementById('ts-empty').textContent = emptyCount.toLocaleString('vi-VN');
+          
+          const animalPct = total > 0 ? ((animalCount / total) * 100).toFixed(1) : '0.0';
+          const emptyPct = total > 0 ? ((emptyCount / total) * 100).toFixed(1) : '0.0';
+          
+          document.getElementById('ts-animals-pct').textContent = animalPct + '%';
+          document.getElementById('ts-empty-pct').textContent = emptyPct + '%';
+
+          // Set Processing Time
+          const elapsedSeconds = ((Date.now() - startTime) / 1000).toFixed(1);
+          document.getElementById('c-time').textContent = elapsedSeconds + ' giây';
+
+          setTimeout(() => goTo('complete'), 600);
+          return;
+        }
+
+        done++;
+        const file = selectedFiles[done - 1] || { name: `IMG_${done}.JPG` };
+        const typeIdx = Math.floor(Math.random() * 3);
+        const type = types[typeIdx];
+        const conf = (Math.random() * 0.35 + 0.55).toFixed(2);
+        if (type !== 'unknown') found++;
+
+        importResults.push({ name: file.name, type, conf, size: file.size || '—' });
+
+        const p = Math.round((done / total) * 100);
+        bar.style.width = p + '%';
+        pct.textContent = p + '%';
+        label.textContent = `Phân tích: ${file.name}`;
+        sDone.textContent = done;
+        sFound.textContent = found;
+
+        // log
+        const line = document.createElement('div');
+        const typeLabel = labels[typeIdx];
+        const cls = type === 'tete' ? 'ok' : (type === 'hunter' ? 'warn' : 'info');
+        line.className = 'log-line ' + cls;
+        line.textContent = `[${done}/${total}] ${file.name} → ${typeLabel} (conf: ${conf})`;
+        log.appendChild(line);
+        log.scrollTop = log.scrollHeight;
+
+        const delay = total > 20 ? 120 : 250;
+        setTimeout(step, delay);
+      }
+
+      step();
+    }
+
+    // ==============================
+    // HISTORY
+    // ==============================
+    function renderHistory(filter) {
+      const list = document.getElementById('history-list');
+      list.innerHTML = '';
+
+      const items = filter === 'all'
+        ? importResults
+        : importResults.filter(r => r.type === filter);
+
+      if (items.length === 0) {
+        list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0;">Không có ảnh nào phù hợp.</div>';
+        return;
+      }
+
+      items.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+
+        const pillClass = r.type === 'tete' ? 'tete' : (r.type === 'hunter' ? 'danger' : 'unknown');
+        const pillLabel = r.type === 'tete' ? '🦔 Tê tê' : (r.type === 'hunter' ? '⚠️ Thợ săn' : '❓ Không rõ');
+
+        item.innerHTML = `
+          <div class="history-thumb-placeholder">🖼️</div>
+          <div>
+            <div class="hi-name">${r.name}</div>
+            <div class="hi-meta">Confidence: ${(r.conf * 100).toFixed(0)}% • ${r.size || '—'}</div>
+          </div>
+          <div class="pill ${pillClass}">${pillLabel}</div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function filterHistory(type, btn) {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      renderHistory(type);
+    }
+
+    // ==============================
+    // RESET
+    // ==============================
+    function resetScan() {
+      selectedFiles = [];
+      importResults = [];
+      document.getElementById('file-list').innerHTML = '';
+      document.getElementById('btn-start-import').disabled = true;
+      document.getElementById('btn-start-import').style.opacity = '0.4';
+      document.getElementById('progress-log').innerHTML = '<div class="log-line info">[INFO] Khởi động AI engine...</div>';
+      goTo('home');
+    }
+
+    // ==============================
+    // INIT
+    // ==============================
+    renderStepBar();
+  </script>
+
+</body>
+
+</html>

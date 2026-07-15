@@ -59,6 +59,8 @@ function renderEvents(events) {
     const probText =
       typeof ev.probability === "number" ? `${Math.round(ev.probability * 100)}%` : "—";
 
+    const confidenceText = ev.event_type === "TeTe" ? "" : ` · Độ tin cậy: ${probText}`;
+
     const wrap = document.createElement("div");
     wrap.className = "event";
 
@@ -67,7 +69,7 @@ function renderEvents(events) {
         <div class="event-meta">
           <div class="event-title">${eventLabel(ev.event_type, ev.source)}</div>
           <div class="event-desc">
-            Thời gian: ${formatTime(ev.created_at)} · Độ tin cậy: ${probText} · Nguồn: ${ev.source ?? "—"}
+            Thời gian: ${formatTime(ev.created_at)}${confidenceText} · Nguồn: ${ev.source ?? "—"}
           </div>
         </div>
         <div class="${pillClass(ev.event_type)}">${ev.event_type}</div>

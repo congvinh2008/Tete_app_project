@@ -3,101 +3,371 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ranger Monitor AI</title>
+    <title>Login - Ranger Monitor AI</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+      :root {
+        --bg-dark-green: #081403;
+        --accent-green: #8bc34a;
+        --accent-glow: rgba(139, 195, 74, 0.3);
+        --text-light: #f5f5f5;
+        --glass-bg: rgba(26, 46, 17, 0.65);
+        --glass-border: rgba(139, 195, 74, 0.2);
+      }
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: "Outfit", sans-serif;
       }
 
       body {
         height: 100vh;
-        background: #2e7d32;
+        background-color: var(--bg-dark-green);
+        background-image: 
+          radial-gradient(circle at 10% 20%, rgba(37, 102, 40, 0.15) 0%, transparent 40%),
+          radial-gradient(circle at 90% 80%, rgba(139, 195, 74, 0.1) 0%, transparent 40%);
         display: flex;
         justify-content: center;
         align-items: center;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Background glowing blobs */
+      .blob {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+        filter: blur(40px);
+        z-index: 1;
+        animation: float 12s infinite alternate ease-in-out;
+      }
+      .blob-1 {
+        top: -50px;
+        left: -50px;
+      }
+      .blob-2 {
+        bottom: -50px;
+        right: -50px;
+        animation-delay: -6s;
+      }
+
+      @keyframes float {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(50px, 30px) scale(1.1); }
       }
 
       .card {
-        background: #e0e0e0;
-        width: 420px;
-        padding: 50px 40px;
-        border-radius: 25px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        width: 100%;
+        max-width: 420px;
+        padding: 45px 35px;
+        border-radius: 24px;
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(139, 195, 74, 0.05);
         text-align: center;
+        z-index: 10;
+        animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       .title {
         font-size: 28px;
-        font-weight: bold;
-        color: #2e7d32;
+        font-weight: 700;
+        color: var(--accent-green);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+        color: #b0bec5;
         margin-bottom: 35px;
+      }
+
+      .form-group {
+        position: relative;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--accent-green);
+        margin-bottom: 8px;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-wrapper svg {
+        position: absolute;
+        left: 14px;
+        color: #78909c;
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+        transition: color 0.3s;
       }
 
       input {
         width: 100%;
-        padding: 15px;
-        margin-bottom: 18px;
+        padding: 14px 16px 14px 44px;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 12px;
-        border: 1px solid #bbb;
-        font-size: 16px;
+        color: var(--text-light);
+        font-size: 15px;
         outline: none;
+        transition: all 0.3s ease;
       }
 
       input:focus {
-        border: 1px solid #2e7d32;
+        border-color: var(--accent-green);
+        box-shadow: 0 0 10px var(--accent-glow);
+        background: rgba(0, 0, 0, 0.55);
+      }
+
+      input:focus + svg {
+        color: var(--accent-green);
+      }
+
+      /* Password toggle icon */
+      .toggle-password {
+        position: absolute;
+        right: 14px;
+        cursor: pointer;
+        color: #78909c;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+      }
+      .toggle-password:hover {
+        color: var(--text-light);
       }
 
       button {
         width: 100%;
-        padding: 15px;
-        margin-top: 10px;
+        padding: 14px;
+        margin-top: 15px;
         border: none;
-        border-radius: 20px;
-        background: #2e7d32;
-        color: white;
-        font-size: 18px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
         cursor: pointer;
-        transition: 0.3s;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
       }
 
-      button:hover {
-        background: #256628;
+      .btn-primary {
+        background: linear-gradient(135deg, #8bc34a, #689f38);
+        color: #0b1a03;
+        box-shadow: 0 4px 15px rgba(139, 195, 74, 0.3);
       }
 
-      .google {
-        background: #4285f4;
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 195, 74, 0.5);
       }
 
-      .google:hover {
-        background: #3367d6;
+      .btn-primary:active {
+        transform: translateY(0);
       }
 
-      .register {
-        background: #757575;
+      .btn-google {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text-light);
+        margin-top: 12px;
       }
 
-      .register:hover {
-        background: #5a5a5a;
+      .btn-google:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        margin: 20px 0;
+        color: #78909c;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .divider::before, .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .divider::before { margin-right: 10px; }
+      .divider::after { margin-left: 10px; }
+
+      .register-prompt {
+        margin-top: 25px;
+        font-size: 14px;
+        color: #b0bec5;
+      }
+
+      .register-link {
+        color: var(--accent-green);
+        text-decoration: none;
+        font-weight: 600;
+        margin-left: 5px;
+        transition: color 0.2s;
+      }
+
+      .register-link:hover {
+        text-decoration: underline;
+        color: #a2d85b;
+      }
+
+      /* Custom Toast Notification */
+      .toast {
+        position: fixed;
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(211, 47, 47, 0.95);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        z-index: 10005;
+        transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .toast.success {
+        background: rgba(76, 175, 80, 0.95);
+      }
+
+      .toast.show {
+        top: 30px;
+      }
+
+      /* Spinner animation for loading */
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        display: none;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
       }
     </style>
   </head>
 
   <body>
+    <!-- Background animations -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
     <div class="card">
-      <div class="title">🌿 Ranger Monitor AI</div>
+      <div class="title">
+        <svg style="width:28px;height:28px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+        Ranger Monitor AI
+      </div>
+      <div class="subtitle">Hệ thống giám sát bảo tồn thiên nhiên</div>
 
-      <input type="email" id="email" placeholder="Email" />
-      <input type="password" id="password" placeholder="Password" />
+      <div class="form-group">
+        <label for="email">Tài khoản Email</label>
+        <div class="input-wrapper">
+          <input type="email" id="email" placeholder="example@domain.com" required />
+          <!-- Email icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+      </div>
 
-      <button onclick="login()">Login</button>
-      <button class="google" onclick="loginGoogle()">Login with Google</button>
-      <button class="register" onclick="location.href = '/register'">
-        Register
+      <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        <div class="input-wrapper">
+          <input type="password" id="password" placeholder="••••••••" required />
+          <!-- Lock icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <!-- Password toggle visibility -->
+          <div class="toggle-password" onclick="togglePasswordVisibility()">
+            <svg id="eye-icon" style="width:20px;height:20px;position:static;color:#78909c;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="login()">
+        <span class="spinner" id="login-spinner"></span>
+        <span id="login-text">Đăng nhập</span>
       </button>
+
+      <div class="divider">Hoặc</div>
+
+      <button class="btn-google" onclick="loginGoogle()">
+        <!-- Google SVG Icon -->
+        <svg style="width:18px;height:18px;" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.77c-.98.66-2.23 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        Đăng nhập với Google
+      </button>
+
+      <div class="register-prompt">
+        Chưa có tài khoản? 
+        <a class="register-link" href="/register">Đăng ký ngay</a>
+      </div>
+    </div>
+
+    <!-- Custom Toast banner -->
+    <div class="toast" id="toast">
+      <span id="toast-message">Có lỗi xảy ra!</span>
     </div>
 
     <script type="module">
@@ -123,24 +393,78 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
 
+      // Utility toast helper
+      function showToast(message, type = "error") {
+        const toast = document.getElementById("toast");
+        const msgEl = document.getElementById("toast-message");
+        msgEl.textContent = message;
+        
+        toast.className = "toast";
+        if (type === "success") {
+          toast.classList.add("success");
+        }
+        toast.classList.add("show");
+        
+        setTimeout(() => {
+          toast.classList.remove("show");
+        }, 4000);
+      }
+
+      // Password visibility helper
+      window.togglePasswordVisibility = function() {
+        const passwordInput = document.getElementById("password");
+        const eyeIcon = document.getElementById("eye-icon");
+        
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          // Change SVG to slashed eye
+          eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+        } else {
+          passwordInput.type = "password";
+          // Revert SVG to normal eye
+          eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+        }
+      }
+
       // 🔐 Login Email/Password
       window.login = function () {
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
 
         if (!email || !password) {
-          alert("Vui lòng nhập đầy đủ thông tin!");
+          showToast("Vui lòng nhập đầy đủ email và mật khẩu!");
           return;
         }
 
+        const spinner = document.getElementById("login-spinner");
+        const btnText = document.getElementById("login-text");
+        
+        // Show loading state
+        spinner.style.display = "inline-block";
+        btnText.textContent = "Đang xác thực...";
+        document.querySelector(".btn-primary").disabled = true;
+
         signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
-            console.log("Login thành công:", userCredential.user);
-            window.location.href = "/";
+            showToast("Đăng nhập thành công!", "success");
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 800);
           })
           .catch((error) => {
-            alert(error.message);
-            console.log(error);
+            console.error(error);
+            let userFriendlyMsg = "Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản!";
+            if (error.code === "auth/invalid-credential" || error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
+              userFriendlyMsg = "Email hoặc mật khẩu không chính xác!";
+            } else if (error.code === "auth/invalid-email") {
+              userFriendlyMsg = "Địa chỉ email không hợp lệ!";
+            }
+            showToast(userFriendlyMsg);
+            
+            // Revert loading state
+            spinner.style.display = "none";
+            btnText.textContent = "Đăng nhập";
+            document.querySelector(".btn-primary").disabled = false;
           });
       };
 
@@ -150,11 +474,14 @@
 
         signInWithPopup(auth, provider)
           .then(() => {
-            window.location.href = "/";
+            showToast("Đăng nhập thành công!", "success");
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 800);
           })
           .catch((error) => {
-            alert("Đăng nhập Google thất bại!");
-            console.log(error.message);
+            console.error(error);
+            showToast("Đăng nhập bằng Google thất bại!");
           });
       };
     </script>

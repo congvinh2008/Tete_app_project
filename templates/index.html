@@ -87,6 +87,17 @@
       border-color: rgba(239, 83, 80, 0.25);
     }
 
+    .btn.scan-btn {
+      background: linear-gradient(180deg, rgba(0, 172, 193, 0.9), rgba(0, 131, 143, 0.8));
+      border-color: rgba(0, 229, 255, 0.3);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+    }
+
+    .btn.scan-btn:hover {
+      border-color: rgba(0, 229, 255, 0.55);
+      box-shadow: 0 4px 16px rgba(0, 229, 255, 0.3);
+    }
+
     .container {
       padding: 18px;
       display: grid;
@@ -301,16 +312,117 @@
       color: var(--text);
       box-shadow: 0 0 8px rgba(139, 195, 74, 0.2);
     }
+
+    /* === AUTH GATE === */
+    /* Hide all main content until auth is confirmed */
+    body > header,
+    body > main {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Auth overlay covers the entire screen */
+    #auth-gate {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #061306;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(37, 102, 40, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 195, 74, 0.1) 0%, transparent 40%);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+    }
+
+    #auth-gate.visible {
+      display: flex;
+    }
+
+    .auth-gate-card {
+      background: rgba(26, 46, 17, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(139, 195, 74, 0.2);
+      border-radius: 24px;
+      padding: 48px 44px;
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: gate-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes gate-pop {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-gate-icon {
+      font-size: 52px;
+      margin-bottom: 16px;
+    }
+
+    .auth-gate-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #8bc34a;
+      margin-bottom: 10px;
+    }
+
+    .auth-gate-desc {
+      font-size: 14px;
+      color: rgba(232, 245, 233, 0.65);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .auth-gate-btn {
+      display: inline-block;
+      padding: 14px 36px;
+      background: linear-gradient(135deg, #8bc34a, #689f38);
+      color: #0b1a03;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(139, 195, 74, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .auth-gate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 195, 74, 0.55);
+    }
   </style>
 </head>
 
 <body>
+  <!-- AUTH GATE OVERLAY: shown only for unauthenticated users -->
+  <div id="auth-gate">
+    <div class="auth-gate-card">
+      <div class="auth-gate-icon">🔒</div>
+      <div class="auth-gate-title">Yêu cầu đăng nhập</div>
+      <div class="auth-gate-desc">
+        Trang này chứa dữ liệu quan trắc bảo tồn thiên nhiên được bảo vệ.<br />
+        Vui lòng đăng nhập để tiếp tục.
+      </div>
+      <a class="auth-gate-btn" href="/login">Đăng nhập ngay →</a>
+    </div>
+  </div>
+
   <header class="header">
     <div class="title">
       <img class="brand-logo" src="{{ url_for('static', filename='images/tete-logo.png') }}" alt="Tete" />
     </div>
     <div class="actions">
       <button class="btn" onclick="location.href='/game'">Game</button>
+      <button class="btn scan-btn" onclick="location.href='/scan'">Import card ID</button>
       <button class="btn" onclick="location.href='/about'">About us</button>
       <button class="btn primary" onclick="location.href='/map'">Animal Spot</button>
       <button class="btn primary" onclick="location.href='/hunter_spot'">Hunter Spot</button>
@@ -394,14 +506,28 @@
     const auth = getAuth(fbApp);
 
     const loginBtn = document.querySelector(".login-btn-header");
+    const authGate = document.getElementById("auth-gate");
+    const header   = document.querySelector("body > header");
+    const mainEl   = document.querySelector("body > main");
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        // ✅ Authenticated: hide gate, reveal page
+        authGate.classList.remove("visible");
+        header.style.visibility = "visible";
+        header.style.pointerEvents = "auto";
+        mainEl.style.visibility = "visible";
+        mainEl.style.pointerEvents = "auto";
+
         loginBtn.textContent = `${user.email} | Logout`;
         loginBtn.onclick = logout;
       } else {
-        loginBtn.textContent = "Login";
-        loginBtn.onclick = () => (window.location.href = "/login");
+        // 🚫 Not authenticated: show full-screen auth gate, keep page hidden
+        authGate.classList.add("visible");
+        header.style.visibility = "hidden";
+        header.style.pointerEvents = "none";
+        mainEl.style.visibility = "hidden";
+        mainEl.style.pointerEvents = "none";
       }
     });
 

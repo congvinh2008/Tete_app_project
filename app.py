@@ -6,10 +6,21 @@ import uuid
 from pathlib import Path
 from typing import Optional
 from datetime import datetime, timezone
+from ultralytics import YOLO
+import cv2
+import numpy as np
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+yolo_model_path = os.path.join(app.root_path, "static", "my_model", "best.pt")
+try:
+    yolo_model = YOLO(yolo_model_path)
+    print("YOLOv8 model loaded successfully. Classes:", yolo_model.names)
+except Exception as e:
+    print(f"Warning: Could not load YOLOv8 model: {e}")
+    yolo_model = None
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -125,6 +136,11 @@ def goRegister():
 @app.route("/game")
 def game():
     return render_template("TeTe_game/index.html")
+
+
+@app.route("/scan")
+def scan():
+    return render_template("scan.html")
 
 @app.route("/about")
 def about():
@@ -258,6 +274,43 @@ def analyze():
         "latitude": latitude,
         "longitude": longitude
     })
+
+@app.route("/api/predict", methods=["POST"])
+def predict_api():
+    if yolo_model is None:
+        return jsonify({"error": "YOLO model is not loaded"}), 500
+        
+    if "image" not in request.files:
+        return jsonify({"error": "No image file provided"}), 400
+        
+    file = request.files["image"]
+    img_bytes = file.read()
+    
+    nparr = np.frombuffer(img_bytes, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    
+    if img is None:
+        return jsonify({"error": "Invalid image format"}), 400
+        
+    results = yolo_model(img, conf=0.25)
+    
+    detections = []
+    for r in results:
+        boxes = r.boxes
+        for box in boxes:
+            x1, y1, x2, y2 = box.xyxy[0].tolist()
+            conf = float(box.conf[0])
+            cls = int(box.cls[0])
+            name = r.names[cls]
+            
+            detections.append({
+                "box": [x1, y1, x2, y2],
+                "confidence": conf,
+                "class": name
+            })
+            
+    return jsonify({"detections": detections})
+
 
 if __name__ == "__main__":
     app.run(debug=True)

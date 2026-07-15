@@ -1,17 +1,12 @@
-const MODEL_URL = "/static/my_model/";
-
-let model;
-let labelContainer;
-let maxPredictions = 0;
 let img;
 let canvas;
 let ctx;
 let isModelLoaded = false;
+let lastDetections = [];
+let isPredicting = false;
 
 // Audio alerts
-const amThanhCuu = new Audio("/static/sound/Nguy_hiem.mp3");
 const amThanhTeTe = new Audio("/static/sound/Phat_hien_te_te.mp3");
-let dangPhatCuu = false;
 let dangPhatTeTe = false;
 
 // Upload/throttle state
@@ -20,11 +15,6 @@ const lastEventAtByType = new Map(); // event_type -> epoch ms
 
 async function startIPCamera() {
   try {
-    const modelURL = MODEL_URL + "model.json";
-    const metadataURL = MODEL_URL + "metadata.json";
-
-    model = await tmImage.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
     isModelLoaded = true;
 
     img = document.getElementById("ipcam");
@@ -33,50 +23,134 @@ async function startIPCamera() {
 
     labelContainer = document.getElementById("label-container");
     labelContainer.innerHTML = "";
-    for (let i = 0; i < maxPredictions; i++) {
-      labelContainer.appendChild(document.createElement("div"));
-    }
 
-    loop();
+    // Start loops
+    renderLoop();
+    predictionLoop();
   } catch (error) {
-    console.error("Khong the tai mo hinh:", error);
+    console.error("Khong the khoi dong camera:", error);
     const el = document.getElementById("label-container");
-    if (el) el.textContent = "Loi: khong tai duoc AI model.";
+    if (el) el.textContent = "Loi: khong khoi dong duoc camera.";
   }
 }
 
-async function loop() {
-  if (isModelLoaded) {
+function renderLoop() {
+  if (img && img.complete && img.naturalWidth !== 0) {
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    await predict();
+    drawDetections();
+  } else {
+    // Clear canvas and show loading message if stream not active
+    ctx.fillStyle = "#1a2e11";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("⏳ Đang tải luồng video...", canvas.width / 2, canvas.height / 2);
   }
-  requestAnimationFrame(loop);
+  requestAnimationFrame(renderLoop);
+}
+
+async function predictionLoop() {
+  if (isModelLoaded && !isPredicting) {
+    isPredicting = true;
+    try {
+      await predict();
+    } catch (e) {
+      console.error("Loi khi chay du doan:", e);
+    } finally {
+      isPredicting = false;
+    }
+  }
+  setTimeout(predictionLoop, 150); // ~7 FPS
 }
 
 async function predict() {
-  const prediction = await model.predict(canvas);
+  if (!canvas) return;
 
-  for (let i = 0; i < maxPredictions; i++) {
-    const prob = Number(prediction[i].probability);
-    const name = prediction[i].className;
-    let text = "";
-
-    if (name === "TeTe" && prob >= 0.8) {
-      text = `Phat hien Te Te (${Math.round(prob * 100)}%)`;
-      playAudioOnce("tete");
-      maybeCaptureAndUploadEvent("TeTe", prob);
-    } else if (name === "Nguy hiem" && prob >= 0.8) {
-      text = `CANH BAO: Te Te keu cuu (${Math.round(prob * 100)}%)`;
-      playAudioOnce("nguyhiem");
-      maybeCaptureAndUploadEvent("Nguy hiem", prob);
-    } else {
-      text = "";
-      resetAudioState(name);
+  const blob = await new Promise((resolve) => {
+    try {
+      canvas.toBlob((b) => resolve(b), "image/jpeg", 0.85);
+    } catch (e) {
+      console.warn("Khong the capture canvas blob:", e);
+      resolve(null);
     }
+  });
 
-    if (labelContainer?.childNodes?.[i] && labelContainer.childNodes[i].innerHTML !== text) {
-      labelContainer.childNodes[i].innerHTML = text;
-    }
+  if (!blob) return;
+
+  const formData = new FormData();
+  formData.append("image", blob, "frame.jpg");
+
+  const res = await fetch("/api/predict", {
+    method: "POST",
+    body: formData
+  });
+
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status}`);
+  }
+
+  const data = await res.json();
+  lastDetections = data.detections || [];
+  processDetections(lastDetections);
+}
+
+function drawDetections() {
+  if (!lastDetections || lastDetections.length === 0) return;
+
+  ctx.lineWidth = 3;
+  ctx.font = "bold 14px Arial";
+  ctx.textBaseline = "top";
+  ctx.textAlign = "left";
+
+  lastDetections.forEach((det) => {
+    const [x1, y1, x2, y2] = det.box;
+    const conf = det.confidence;
+    const label = det.class;
+
+    // Draw box
+    ctx.strokeStyle = "#8bc34a"; // accent-green
+    ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+
+    // Draw label background
+    const text = label;
+    const textWidth = ctx.measureText(text).width;
+    ctx.fillStyle = "rgba(139, 195, 74, 0.85)";
+    ctx.fillRect(x1 - 1, y1 - 22, textWidth + 10, 22);
+
+    // Draw text
+    ctx.fillStyle = "#0b1a03";
+    ctx.fillText(text, x1 + 4, y1 - 18);
+  });
+}
+
+function processDetections(detections) {
+  // Check for any detection with class matching pangolin/tete/class 0
+  const teteDets = detections.filter((d) => {
+    const cls = d.class.toLowerCase();
+    return (
+      cls.includes("tete") ||
+      cls.includes("te_te") ||
+      cls.includes("pangolin") ||
+      cls.includes("tê tê") ||
+      cls.includes("tê_tê") ||
+      d.class === "0"
+    );
+  });
+
+  const labelContainer = document.getElementById("label-container");
+  if (!labelContainer) return;
+
+  if (teteDets.length > 0) {
+    const maxConf = Math.max(...teteDets.map((d) => d.confidence));
+
+    labelContainer.innerHTML = `<span style="color: var(--accent-green); font-size: 20px; text-shadow: 0 0 10px rgba(139, 195, 74, 0.5);">🌿 Phát hiện Tê Tê</span>`;
+
+    playAudioOnce("tete");
+    maybeCaptureAndUploadEvent("TeTe", maxConf);
+  } else {
+    labelContainer.innerHTML = "";
+    dangPhatTeTe = false;
   }
 }
 
@@ -87,20 +161,7 @@ function playAudioOnce(type) {
     amThanhTeTe.onended = () => {
       dangPhatTeTe = false;
     };
-    return;
   }
-
-  if (type === "nguyhiem" && !dangPhatCuu) {
-    dangPhatCuu = true;
-    amThanhCuu.play().catch(() => {});
-    amThanhCuu.onended = () => {
-      dangPhatCuu = false;
-    };
-  }
-}
-
-function resetAudioState(_name) {
-  // Optional: can stop/reset audio here if needed.
 }
 
 function canSendEventNow(eventType) {
